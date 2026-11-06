@@ -1,0 +1,2593 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="yucs 場效電晶體 JFET / MOSFET (D-MOS, E-MOS) 原理動畫與互動實驗教材">
+<title>FET_JFET_MOSFET 教學動畫｜yucs</title>
+<style>
+:root{
+  --ink:#253c3c;--muted:#63736f;--paper:#f6f7f1;--white:#fff;--line:#dce3d8;
+  --green:#315f51;--green-dark:#23473c;--green-soft:#e9f0e7;--accent:#deac57;
+  --red:#d63939;--led-green:#18b848;--pnp:#c96a1b;--npn:#1d6fa5;
+  --media-share:64%;
+  font-family:"Segoe UI","Microsoft JhengHei","PingFang TC",sans-serif;
+  color:var(--ink);font-size:15px;color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+button,select,input{font:inherit}
+button{border:1px solid var(--line);border-radius:7px;background:var(--white);color:var(--ink);padding:7px 12px;cursor:pointer;transition:background .15s,border-color .15s,transform .08s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+button:hover:not(:disabled){background:var(--green-soft);border-color:#adc2ae}
+button:active:not(:disabled){transform:translateY(1px)}
+button:disabled{opacity:.42;cursor:default}
+button.primary{background:var(--green);border-color:var(--green);color:#fff}
+button.primary:hover:not(:disabled){background:var(--green-dark)}
+button.active-toggle{background:#fff4dc;border-color:var(--accent);color:#6e4b0c;font-weight:700}
+button.warn-btn{background:#fff0ee;border-color:#e5a29c;color:#a12c22;font-weight:700}
+button.warn-btn:hover{background:#ffe2de}
+button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:76px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line);flex-shrink:0}
+.brand{display:flex;align-items:center;gap:13px;min-width:0}
+.brand-symbol{background:var(--green);color:#fff;border-radius:11px;width:44px;height:44px;display:grid;place-items:center;font-size:24px;flex-shrink:0;font-weight:700}
+.overline{font-size:11px;letter-spacing:2.2px;font-weight:700;color:var(--green);display:block}
+.brand h1{margin:2px 0 0;font-size:20px;font-weight:700;line-height:1.25;overflow-wrap:anywhere}
+.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;flex-shrink:0}
+.icon-button{font-size:18px;padding:6px 11px}
+
+/* Workspace & Sidebar */
+.workspace{display:flex;flex:1;min-height:0;overflow:hidden}
+.sidebar{width:244px;flex-shrink:0;border-right:1px solid var(--line);display:flex;flex-direction:column;padding:16px 11px 12px;background:#f0f3eb;min-height:0}
+.sidebar-heading{display:flex;align-items:center;justify-content:space-between;padding:0 10px 10px;font-size:12px;letter-spacing:1px;font-weight:700}
+.count{font-weight:500;color:var(--muted);letter-spacing:0}
+.page-list{overflow-y:auto;flex:1;min-height:0;padding:2px}
+.page-item{display:flex;gap:9px;width:100%;text-align:left;padding:9px 10px;background:transparent;border:1px solid transparent;border-radius:8px;margin-bottom:5px;align-items:flex-start;white-space:normal}
+.page-item.active{background:#fff;border-color:#cad7c5;box-shadow:0 2px 6px #284c3512}
+.page-item .number{font-size:12px;font-weight:700;color:var(--muted);min-width:22px;padding-top:2px}
+.page-item.active .number{color:var(--green)}
+.page-item .page-info{min-width:0;flex:1}
+.page-item .page-title{display:block;font-size:13px;font-weight:600;line-height:1.42}
+.page-item .page-chapter{font-size:11px;color:var(--muted);display:block;margin-top:2px}
+.sidebar-legend{margin-top:8px;padding:10px 10px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:11.8px;line-height:1.68}
+.legend-row{display:flex;align-items:center;gap:7px}
+.dot-sample{width:11px;height:11px;border-radius:50%;display:inline-block;flex-shrink:0}
+
+/* Main Lesson Split */
+.lesson{display:grid;grid-template-columns:minmax(0,var(--media-share)) 14px minmax(0,1fr);flex:1;min-width:0;min-height:0;padding:16px 22px 12px;gap:0}
+.media-pane{display:flex;flex-direction:column;min-height:0;min-width:0;padding-right:8px}
+.pane-heading{display:flex;align-items:center;gap:10px;justify-content:space-between;font-size:12px;font-weight:700;letter-spacing:.5px;min-height:26px;margin-bottom:4px;flex-wrap:wrap}
+.status-pill{font-weight:600;font-size:12px;padding:3px 10px;border-radius:99px;background:var(--green-soft);color:var(--green)}
+.status-pill.fault{background:#ffe8e5;color:#a8251b}
+.status-pill.warn{background:#fff3d6;color:#7d5308}
+
+.media-viewport{flex:1;min-height:0;background:#fafbf7;border:1px solid #d2dbcc;border-radius:12px;display:flex;flex-direction:column;overflow:hidden;position:relative;box-shadow:inset 0 1px 4px #1f33270a}
+.canvas-stage{flex:1;min-height:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;user-select:none;background-image:radial-gradient(#dce3d6 1px,transparent 1px);background-size:18px 18px}
+.canvas-stage.pannable{cursor:grab}
+.canvas-stage.panning{cursor:grabbing}
+.canvas-stage svg{width:100%;height:100%;display:block}
+
+.diag-banner{padding:8px 14px;background:#253c3c;color:#fff;font-size:13px;line-height:1.48;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #395757;flex-shrink:0}
+.diag-banner.ok{background:#295446}
+.diag-banner.err{background:#8f2820}
+.diag-banner.warn{background:#7d5610}
+.diag-banner strong{color:#ffe08a}
+
+/* Controls & Sliders */
+.media-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-height:42px;padding-top:8px}
+.tool-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.media-controls button,.media-controls select{font-size:12.5px;padding:5px 10px}
+.media-controls select{border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+.preset-bar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 12px;background:#f2f5ee;border-top:1px solid var(--line);font-size:12.5px}
+.preset-bar span{font-weight:700;color:var(--green)}
+.preset-bar button{font-size:12px;padding:4px 9px}
+.slider-lbl{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #cbd8c6;padding:3px 10px;border-radius:7px;font-weight:600;color:#1e3f34}
+.slider-lbl input[type="range"]{width:128px;accent-color:var(--green);cursor:pointer}
+.slider-lbl b{min-width:48px;text-align:right;color:#b45309;font-family:Consolas,monospace}
+
+/* Scrollable Panels inside Stage (Unit 8 & 9) */
+.stage-scroll{width:100%;height:100%;overflow-y:auto;padding:16px 20px;user-select:text}
+.comp-table{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);font-size:13.5px}
+.comp-table th{background:var(--green);color:#fff;padding:10px 12px;text-align:left}
+.comp-table td{padding:9px 12px;border-bottom:1px solid #e5ece2;line-height:1.5}
+.comp-table tr:nth-child(even) td{background:#f9fbf7}
+.tag-green{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-weight:700;font-size:12px}
+.tag-red{background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:99px;font-weight:700;font-size:12px}
+
+.qa-grid{display:flex;flex-direction:column;gap:10px}
+.qa-card{background:#fff;border:1px solid #cbd8c6;border-radius:10px;padding:12px 15px;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.qa-card:hover{border-color:var(--green);box-shadow:0 3px 10px rgba(49,95,81,.09)}
+.qa-card.open{border-color:var(--accent);background:#fffdf7}
+.qa-q{display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:700;color:#1e3f34;font-size:14.2px;line-height:1.45}
+.qa-arrow{font-size:12px;color:var(--green);white-space:nowrap;background:var(--green-soft);padding:3px 8px;border-radius:6px}
+.qa-a{margin-top:10px;padding-top:10px;border-top:1px dashed #dcd6c0;font-size:13.8px;line-height:1.75;color:#334155}
+
+.quiz-list{display:flex;flex-direction:column;gap:14px;padding-bottom:16px}
+.quiz-card{background:#fff;border:1px solid #cbd8c6;border-radius:10px;padding:14px 16px}
+.quiz-q{font-weight:700;font-size:14.2px;line-height:1.55;margin-bottom:10px;color:#1e293b}
+.quiz-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.quiz-opt{justify-content:flex-start;text-align:left;white-space:normal;line-height:1.4;padding:8px 11px;font-size:13.2px}
+.quiz-opt.right{background:#dcfce7!important;border-color:#16a34a!important;color:#14532d!important;font-weight:700}
+.quiz-opt.wrong{background:#fee2e2!important;border-color:#dc2626!important;color:#7f1d1d!important}
+.quiz-exp{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:13px;line-height:1.65}
+.quiz-exp.ok{background:#ecfdf5;border-left:4px solid #16a34a;color:#14532d}
+.quiz-exp.err{background:#fff1f2;border-left:4px solid #e11d48;color:#881337}
+
+/* Divider & Notes Pane */
+.divider{cursor:col-resize;position:relative;touch-action:none}
+.divider::after{content:"";position:absolute;width:4px;height:44px;border-radius:8px;background:#b8c5b1;top:50%;left:5px;transform:translateY(-50%)}
+.divider:hover::after,.divider:focus-visible::after{background:var(--green)}
+
+.notes-pane{padding:0 4px 14px 18px;min-width:0;min-height:0;overflow-y:auto;scrollbar-gutter:stable}
+.step-line{display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--green);font-size:12px;font-weight:700;margin:2px 0 12px}
+.step-line #chapterLabel{background:var(--green-soft);padding:5px 10px;border-radius:5px}
+#lessonTitle{font-size:clamp(20px,1.75vw,27px);font-weight:700;line-height:1.35;margin:0 0 14px;color:var(--ink)}
+.note-content{line-height:1.82;font-size:15px}
+.note-content[contenteditable="true"]{background:#fff;border:2px solid var(--accent);padding:14px;border-radius:8px}
+.note-content p{margin:0 0 .88em}
+.note-content h3{font-size:16.5px;color:var(--green-dark);margin:1.15em 0 .45em;border-left:4px solid var(--green);padding-left:9px}
+.note-content ul,.note-content ol{padding-left:22px;margin:.45em 0 .95em}
+.note-content li{margin-bottom:.38em}
+.note-content blockquote{margin:13px 0;padding:11px 14px;background:#fff4db;border-left:4px solid var(--accent);border-radius:0 8px 8px 0;color:#594318;font-size:14.2px}
+.note-content .tip-green{margin:13px 0;padding:11px 14px;background:var(--green-soft);border-left:4px solid var(--green);border-radius:0 8px 8px 0;color:#1e3f34;font-size:14.2px}
+.note-content code{font-family:Consolas,"Courier New",monospace;background:#e8eee5;padding:1px 6px;border-radius:4px;font-size:.93em;font-weight:600;color:#1d4538}
+.badge-pnp{display:inline-block;background:#fdebd8;color:#9c4a08;border:1px solid #f0c399;padding:1px 7px;border-radius:5px;font-weight:700;font-size:13px}
+.badge-npn{display:inline-block;background:#ddeefa;color:#115380;border:1px solid #9ec8e8;padding:1px 7px;border-radius:5px;font-weight:700;font-size:13px}
+.edit-hint{margin-top:12px;padding:10px 12px;background:#fff8e6;border:1px dashed var(--accent);border-radius:7px;font-size:12.5px;color:#6e5214}
+
+/* Bottom Nav & Footer */
+.bottomnav{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:9px 24px;background:#fff;border-top:1px solid var(--line);flex-shrink:0}
+.nav-center{display:flex;align-items:center;gap:16px}
+.nav-center span{font-size:13px;font-weight:600;min-width:52px;text-align:center;color:var(--muted)}
+.keyboard-hint{font-size:12px;color:var(--muted)}
+.site-footer{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;padding:6px 14px;font-size:11.5px;background:var(--paper);color:#5a6b60;border-top:1px solid #e6ece2;flex-shrink:0}
+
+body.menu-hidden .sidebar{display:none}
+@media(max-width:980px){
+  body{overflow:auto;height:auto}
+  .workspace{flex-direction:column;overflow:visible}
+  .sidebar{width:100%;border-right:0;border-bottom:1px solid var(--line);max-height:210px}
+  .lesson{display:flex;flex-direction:column;padding:12px}
+  .media-viewport{height:58vh;min-height:380px;flex:none}
+  .divider,.keyboard-hint{display:none}
+  .notes-pane{padding:18px 4px}
+  .quiz-opts{grid-template-columns:1fr}
+}
+/* ===== YMHS Clear Admin theme override ===== */
+:root{
+  --ymhs-purple-700:#5a2d82;--ymhs-purple-900:#3a1a5c;--ymhs-purple-050:#f5f0fc;--ymhs-purple-100:#ede0ff;
+  --ymhs-background:#f0f2f5;--ymhs-surface:#fff;--ymhs-border:#e0d0f0;--ymhs-text:#333;--ymhs-muted:#777;
+  --ymhs-success:#26734d;--ymhs-danger:#a12b35;
+  --ymhs-radius-control:7px;--ymhs-radius-panel:12px;--ymhs-shadow-panel:0 2px 10px rgba(0,0,0,.07);
+  --ymhs-focus-ring:0 0 0 3px rgba(90,45,130,.15);
+  --ink:#333;--muted:#777;--paper:#f0f2f5;--line:#e0d0f0;
+  --green:#5a2d82;--green-dark:#3a1a5c;--green-soft:#f5f0fc;--accent:#5a2d82;
+  font-family:"微軟正黑體","Microsoft JhengHei",sans-serif;
+}
+button{border-radius:var(--ymhs-radius-control);border-color:var(--ymhs-border)}
+button:hover:not(:disabled){background:var(--ymhs-purple-100);border-color:#c9b0e6}
+button.primary{background:var(--ymhs-purple-700);border-color:var(--ymhs-purple-700)}
+button.primary:hover:not(:disabled){background:var(--ymhs-purple-900)}
+button.active-toggle{background:var(--ymhs-purple-100);border-color:var(--ymhs-purple-700);color:var(--ymhs-purple-900);font-weight:700}
+button.warn-btn{background:#fdf0f1;border-color:#e3a6ab;color:var(--ymhs-danger)}
+button:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:0;box-shadow:var(--ymhs-focus-ring);border-color:var(--ymhs-purple-700)}
+
+/* 紫色漸層頁首 */
+.topbar{background:linear-gradient(135deg,var(--ymhs-purple-900),var(--ymhs-purple-700));border-bottom:0;color:#fff}
+.topbar .overline{color:#d9c4f2}
+.topbar .brand h1{color:#fff}
+.brand-symbol{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35)}
+.topbar .top-actions button{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff}
+.topbar .top-actions button:hover:not(:disabled){background:rgba(255,255,255,.26)}
+.topbar .top-actions button.active-toggle{background:#fff;color:var(--ymhs-purple-900);border-color:#fff}
+.topbar .top-actions button.primary{background:#fff;color:var(--ymhs-purple-900)}
+
+/* 側欄與卡片 */
+.sidebar{background:var(--ymhs-background);border-right:1px solid var(--ymhs-border)}
+.sidebar-heading{color:var(--ymhs-purple-700)}
+.page-item.active{background:#fff;border-color:var(--ymhs-border);box-shadow:var(--ymhs-shadow-panel);border-left:4px solid var(--ymhs-purple-700)}
+.sidebar-legend{border-radius:9px;border-color:var(--ymhs-border)}
+.media-viewport{border:0;border-radius:var(--ymhs-radius-panel);box-shadow:var(--ymhs-shadow-panel);background:var(--ymhs-surface)}
+.canvas-stage{background-image:none;background:#fff}
+.diag-banner{background:var(--ymhs-purple-050);color:var(--ymhs-text);border-bottom:2px solid var(--ymhs-border)}
+.diag-banner strong{color:var(--ymhs-purple-700)}
+.diag-banner.ok{background:var(--ymhs-purple-050);border-left:5px solid var(--ymhs-success)}
+.diag-banner.err{background:#fdf0f1;border-left:5px solid var(--ymhs-danger)}
+.diag-banner.warn{background:#fff8e6;border-left:5px solid #b7791f}
+.preset-bar{background:var(--ymhs-purple-050);border-top:2px solid var(--ymhs-border)}
+.preset-bar span{color:var(--ymhs-purple-700)}
+.slider-lbl{border-color:var(--ymhs-border);color:var(--ymhs-purple-900)}
+.slider-lbl input[type=range]{accent-color:var(--ymhs-purple-700)}
+.status-pill{background:var(--ymhs-purple-100);color:var(--ymhs-purple-900)}
+.status-pill.fault{background:#fdf0f1;color:var(--ymhs-danger)}
+.pane-heading{color:var(--ymhs-purple-700)}
+
+/* 表格：淺紫表頭＋深紫字 */
+.comp-table th{background:var(--ymhs-purple-050);color:var(--ymhs-purple-900);border-bottom:2px solid var(--ymhs-border)}
+.comp-table td{border-bottom:1px solid var(--ymhs-border)}
+.comp-table tr:nth-child(even) td{background:#faf7fe}
+.tag-green{background:#e4f3ea;color:var(--ymhs-success)}
+.tag-red{background:#fbe6e8;color:var(--ymhs-danger)}
+.qa-card,.quiz-card{border-color:var(--ymhs-border);border-radius:9px}
+.qa-card.open{border-color:var(--ymhs-purple-700);background:var(--ymhs-purple-050)}
+.qa-q{color:var(--ymhs-purple-900)}
+.qa-a{border-top-color:var(--ymhs-border)}
+.quiz-exp.ok{background:#eaf5ef;border-left-color:var(--ymhs-success);color:#1d5a3c}
+.quiz-exp.err{background:#fdf0f1;border-left-color:var(--ymhs-danger);color:#7d2029}
+
+/* 右側講義 */
+.step-line #chapterLabel{background:var(--ymhs-purple-100);color:var(--ymhs-purple-900)}
+#lessonTitle{color:var(--ymhs-purple-700)}
+.note-content h3{color:var(--ymhs-purple-900);border-left-color:var(--ymhs-purple-700)}
+.note-content blockquote{background:var(--ymhs-purple-050);border-left-color:var(--ymhs-purple-700);color:var(--ymhs-text)}
+.note-content .tip-green{background:#eaf5ef;border-left-color:var(--ymhs-success);color:#1d5a3c}
+.note-content .warn-red{margin:13px 0;padding:11px 14px;background:#fdf0f1;border-left:4px solid var(--ymhs-danger);border-radius:0 8px 8px 0;color:#7d2029;font-size:14.2px}
+.stage-scroll .tip-green{padding:10px 14px;background:#eaf5ef;border-left:4px solid var(--ymhs-success);border-radius:0 8px 8px 0;color:#1d5a3c}
+.stage-scroll .warn-red{padding:10px 14px;background:#fdf0f1;border-left:4px solid var(--ymhs-danger);border-radius:0 8px 8px 0;color:#7d2029}
+.note-content code{background:var(--ymhs-purple-050);color:var(--ymhs-purple-900)}
+.note-content[contenteditable="true"]{border-color:var(--ymhs-purple-700)}
+.edit-hint{background:var(--ymhs-purple-050);border-color:var(--ymhs-purple-700);color:var(--ymhs-purple-900)}
+.divider::after{background:#cdb8e6}
+.divider:hover::after,.divider:focus-visible::after{background:var(--ymhs-purple-700)}
+.bottomnav{border-top:1px solid var(--ymhs-border)}
+.site-footer{background:var(--ymhs-background);color:var(--ymhs-muted);border-top:1px solid var(--ymhs-border)}
+.topbar .top-actions button.active-toggle:hover:not(:disabled),.topbar .top-actions button.primary:hover:not(:disabled){background:#fff;color:var(--ymhs-purple-900)}
+
+
+/* YMHS Clear Admin · classroom layout. Embedded in index.html at packaging. */
+:root{--media-share:65%;--ink:#333;--muted:#68616f;--paper:#f0f2f5;--line:#e0d0f0;--green:#5a2d82;--green-dark:#3a1a5c;--green-soft:#f5f0fc;--accent:#5a2d82}
+body{font-family:"微軟正黑體","Microsoft JhengHei",sans-serif}
+.topbar{min-height:60px;padding:8px 12px;gap:12px}
+.brand{gap:9px;flex:1}
+.brand-symbol{width:36px;height:36px;border-radius:7px;font-size:18px}
+.overline{font-size:10px;letter-spacing:1.4px}
+.brand h1{font-size:18px;margin:2px 0 0}
+.top-actions{gap:5px}
+.top-actions button{font-size:12px;padding:6px 8px}
+.top-navigation{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.top-navigation button{padding:7px 10px;background:#fff;color:#3a1a5c;font-weight:700}
+.top-navigation #navCount{min-width:47px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;color:#fff}
+.top-navigation button:disabled{opacity:.5}
+.unit-strip{padding:7px 12px;display:flex;gap:10px;align-items:center;flex-shrink:0;background:#fff;border-bottom:1px solid var(--line)}
+.unit-strip #chapterLabel{color:#5a2d82;background:#f5f0fc;border-radius:5px;padding:4px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.unit-strip #lessonTitle{font-size:20px;margin:0;line-height:1.35;flex-shrink:0}
+.observation{margin:0;display:flex;gap:7px;align-items:baseline;color:#52465c;font-size:13px;line-height:1.5;min-width:0}
+.observation b{color:#5a2d82;white-space:nowrap;border-left:2px solid #e0d0f0;padding-left:10px}
+.workspace{position:relative}
+.sidebar{position:absolute;left:12px;top:8px;bottom:8px;width:300px;z-index:10;padding:12px 8px;background:#f5f0fc;border:1px solid #e0d0f0;border-radius:9px;box-shadow:0 8px 24px #3a1a5c26}
+.sidebar-heading{padding-bottom:8px}
+.page-item .page-title{font-size:14px}
+.page-item .page-chapter{font-size:11px}
+.lesson{padding:8px 12px 6px;grid-template-columns:minmax(0,calc(var(--media-share) - 7px)) 14px minmax(0,1fr)}
+.media-pane{padding-right:0}
+.pane-heading{min-height:22px;margin-bottom:4px;gap:6px;font-size:11.5px}
+.pane-heading #mediaType{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:73%}
+.status-pill{font-size:11px;padding:3px 8px}
+.media-viewport{border:1px solid #e0d0f0;box-shadow:0 2px 10px #0000000d;border-radius:10px}
+.diag-banner{padding:6px 10px;font-size:12.5px;line-height:1.5;gap:6px;flex-wrap:wrap}
+.preset-bar{padding:6px 8px;gap:5px;font-size:12px;max-height:30%;overflow:auto;flex-shrink:0}
+.preset-bar button{font-size:12px;padding:4px 8px}
+.slider-lbl{font-size:12px;padding:3px 6px;max-width:100%}
+.slider-lbl input[type=range]{width:110px;min-width:65px}
+.media-controls{min-height:34px;padding-top:5px;gap:5px}
+.media-controls button,.media-controls select{font-size:12px;padding:5px 8px}
+.notes-pane{padding:0 0 0 12px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable;scroll-padding-top:10px}
+.notes-kicker{font-size:11px;font-weight:700;letter-spacing:1px;color:#5a2d82;margin:5px 0 8px;display:flex;justify-content:space-between}
+.note-content{font-size:16px;line-height:1.75}
+.note-content .lesson-lead{font-size:17px;line-height:1.65;padding:12px 14px;background:#fff;border:1px solid #e0d0f0;border-top:3px solid #5a2d82;border-radius:0 0 8px 8px;margin-bottom:14px;color:#3a1a5c}
+.note-content h3{font-size:16px;margin:1em 0 .45em}
+.note-content p{margin:0 0 .65em}
+.note-content li{margin-bottom:.35em}
+.note-content .formula{background:#fff;border:1px solid #e0d0f0;padding:10px 12px;border-radius:7px;color:#3a1a5c;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.note-content .checkpoint{padding:12px 14px;background:#eaf5ef;border-left:4px solid #26734d;border-radius:0 7px 7px 0;margin:16px 0 10px;color:#1d5a3c;font-size:14px}
+.note-content a{color:#5a2d82;text-underline-offset:3px;overflow-wrap:anywhere}
+.site-footer{gap:3px 16px;padding:4px 12px;font-size:11px;color:#68616f}
+.keyboard-hint{font-size:11px}
+.stage-scroll{padding:12px;overscroll-behavior:contain;min-height:0}
+.comp-table{font-size:13px;min-width:620px}
+.pin-table{min-width:0;font-size:12px}
+.pin-table th,.pin-table td{padding:8px}
+.qa-card:focus-visible{outline:3px solid #5a2d82;outline-offset:2px}
+.quiz-card{border-width:2px}
+.quiz-card.correct{border-color:#26734d;background:#f1faf5}
+.quiz-card.incorrect{border-color:#a12b35;background:#fff4f5}
+.quiz-card .quiz-q{color:#333}
+.asset-notice{padding:9px 12px;background:#fff8e6;border-left:4px solid #b7791f;color:#5e430d;font-size:13px;line-height:1.6;margin-bottom:10px}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gallery-grid img{object-fit:contain!important;height:100px!important}
+.canvas-stage svg [marker-end],.canvas-stage svg [marker-start]{filter:drop-shadow(0 0 2px #ffffff) drop-shadow(0 0 2px #5a2d8260)}
+button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid #5a2d82;outline-offset:2px;box-shadow:0 0 0 4px #ede0ff}
+.topbar button:focus-visible{outline-color:#fff;box-shadow:0 0 0 4px #3a1a5c}
+button,select,input{touch-action:manipulation}
+@media(min-width:1500px){.note-content{font-size:17px}.note-content .lesson-lead{font-size:18px}.note-content h3{font-size:18px}.pane-heading{font-size:12px}.diag-banner{font-size:14px}.preset-bar button{font-size:13px}}
+@media(max-width:1200px){.topbar{flex-wrap:wrap}.brand h1{font-size:16px}.unit-strip{flex-wrap:wrap;gap:5px 10px}.observation{flex-basis:100%}.observation b{border-left:0;padding-left:0}.top-actions{margin-left:auto}}
+@media(max-width:980px){
+ body{height:auto;min-height:100dvh;overflow:auto}
+ .topbar{position:sticky;top:0;z-index:20;gap:7px}
+ .brand{flex-basis:calc(100% - 210px)}
+ .brand h1{font-size:15px}
+ .top-navigation{margin-left:auto}
+ .top-actions{margin-left:0;flex:1}
+ .top-actions button{min-height:32px}
+ .unit-strip{padding:8px 12px}
+ .unit-strip #lessonTitle{font-size:19px;flex-shrink:1}
+ .workspace{overflow:visible;display:block}
+ .lesson{display:flex;flex-direction:column;padding:8px 12px;gap:12px}
+ .media-pane{min-width:0}
+ .media-viewport{height:70vh;min-height:450px;max-height:740px}
+ .pane-heading{flex-wrap:wrap}
+ .pane-heading #mediaType{max-width:100%;white-space:normal}
+ .notes-pane{overflow:visible;padding:0;scrollbar-gutter:auto}
+ .sidebar{position:fixed;top:140px;bottom:45px;max-height:none;width:min(320px,calc(100vw - 24px));z-index:25}
+ .note-content{font-size:16px}
+ .preset-bar{max-height:42%}
+ .pin-workbench{grid-template-columns:1fr!important}
+ .gallery-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .site-footer{padding:8px 12px}
+ .site-footer .keyboard-hint{display:none}
+}
+@media(max-width:520px){
+ .brand{flex-basis:100%}.brand h1{font-size:17px}.brand-symbol{display:none}.overline{font-size:9px}
+ .top-navigation{margin:0}.top-actions{flex-basis:100%;margin:0}.topbar{gap:5px}.topbar button{padding:5px 8px;font-size:11px}
+ .unit-strip #chapterLabel{font-size:11px}.observation{font-size:12px}
+ .media-viewport{height:560px;min-height:560px;max-height:none}
+ .diag-banner{font-size:12px}.media-controls .tool-group{gap:4px}
+ .sidebar{top:174px}
+ .stage-scroll{padding:8px}
+}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+
+
+[data-mode="u8_pinlab"] .media-controls{display:none}
+.principle-page{font-size:16px;line-height:1.65}.principle-page h2{color:#3a1a5c;font-size:23px;margin:4px 0 16px}.principle-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.principle-grid article{min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #e0d0f0;border-radius:10px;padding:16px}.principle-grid h3{color:#5a2d82;margin:0}.canvas-stage .principle-grid svg{width:100%;height:auto;aspect-ratio:2 / 1;flex:none;display:block;font-family:Microsoft JhengHei,sans-serif;font-size:16px}.principle-grid article p{position:static;margin:12px 0 0;line-height:1.7;overflow-wrap:anywhere}.principle-summary{clear:both;padding:16px;background:#f5f0fc;margin:14px 0}.practice-link{display:inline-block;background:#5a2d82;color:#fff!important;text-decoration:none;padding:9px 14px;border-radius:7px;font-size:14px;font-weight:700}.practice-link:focus-visible{outline:3px solid #26734d;outline-offset:3px}@media(max-width:700px){.principle-grid{grid-template-columns:1fr}}
+
+</style>
+</head>
+<body class="teaching menu-hidden">
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-symbol" aria-hidden="true">▧</span>
+    <div>
+      <span class="overline">YUCS · ELECTRONICS LAB</span>
+      <h1 id="bookHeading">FET_JFET_MOSFET 教學動畫</h1>
+    </div>
+  </div>
+<nav class="top-navigation" aria-label="單元翻頁"><button id="prevBtn" aria-label="上一頁">← 上一頁</button><span id="navCount" aria-live="polite">1 / 10</span><button id="nextBtn" aria-label="下一頁">下一頁 →</button></nav>
+  <div class="top-actions"><button id="toggleMenuBtn" aria-controls="sidebar" aria-expanded="false">☰ 目錄</button>
+    <button id="toggleValuesBtn" title="快捷鍵 V：切換顯示進階互導 gm、導通電阻與偏壓細節">⚡ 顯示電氣數值</button>
+    <button id="editModeBtn" title="切換右側教學文字編輯模式">✎ 編輯說明</button>
+    <button id="saveHtmlBtn" hidden class="primary" title="將修改後的教學說明匯出為新 HTML">💾 匯出更新 HTML</button>
+    <button id="fullBtn" class="icon-button" title="切換全螢幕投影" aria-label="全螢幕">⛶</button>
+  </div>
+</header><section class="unit-strip" aria-label="單元與觀察任務"><span id="chapterLabel">單元 1</span><h2 id="lessonTitle">載入中…</h2><p class="observation"><b>觀察任務</b><span id="observationTask"></span></p></section>
+
+<div class="workspace">
+  <aside id="sidebar" class="sidebar" aria-label="教材目錄">
+    <div class="sidebar-heading"><span>教材目錄</span><span id="pageTotal" class="count">9 單元</span></div>
+    <div id="pageList" class="page-list"></div>
+    <div class="sidebar-legend">
+      <div style="font-weight:700;color:var(--green);margin-bottom:4px">載子與物理顏色圖例</div>
+      <div class="legend-row"><span class="dot-sample" style="background:#1d6fa5"></span><span>自由電子 <b>e⁻</b> (由源極 S→D)</span></div>
+      <div class="legend-row"><span class="dot-sample" style="background:#ea580c"></span><span>電洞 <b>h⁺</b> (P型載子)</span></div>
+      <div class="legend-row"><span class="dot-sample" style="background:#dc2626"></span><span>傳統電流 <b>ID</b> (N通道 D→S)</span></div>
+      <div class="legend-row"><span class="dot-sample" style="background:#f59e0b"></span><span>逆偏空乏區 / 夾止強電場</span></div>
+    </div>
+  </aside>
+
+  <main id="lesson" class="lesson">
+    <section class="media-pane" aria-label="動態物理與特性曲線畫布">
+      <div class="pane-heading">
+        <span id="mediaType">互動半導體物理畫布</span>
+        <span id="statusPill" class="status-pill">● 模擬引擎就緒</span>
+      </div>
+
+      <div id="mediaViewport" class="media-viewport">
+        <div id="diagBanner" class="diag-banner ok" role="status"></div>
+        <div id="canvasStage" class="canvas-stage"></div>
+        <div id="presetBar" class="preset-bar"></div>
+      </div>
+
+      <div class="media-controls">
+        <div id="animControls" class="tool-group">
+          <button id="playPauseBtn" class="primary">⏸ 暫停動畫</button>
+          <label style="font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:4px">
+            速度
+            <select id="speedSelect" aria-label="動畫速度">
+              <option value="0.5">0.5× 慢動作</option>
+              <option value="1" selected>1× 正常</option>
+              <option value="1.8">1.8× 快速</option>
+            </select>
+          </label>
+        </div>
+        <div id="cameraControls" class="tool-group"></div>
+        <div class="tool-group">
+          <button id="zoomOutBtn" title="縮小畫面" aria-label="縮小畫面">−</button>
+          <span id="zoomLabel" style="font-size:12px;min-width:44px;text-align:center;font-weight:600">100%</span>
+          <button id="zoomInBtn" title="放大畫面" aria-label="放大畫面">＋</button>
+          <button id="zoomResetBtn">適合頁面</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="divider" class="divider" role="separator" aria-orientation="vertical" aria-valuemin="38" aria-valuemax="80" aria-valuenow="65" aria-label="調整左右寬度" tabindex="0"></div>
+
+    <section id="notes" class="notes-pane" aria-label="教學文字說明">
+      <div class="notes-kicker"><span>理解原理 · 操作驗證</span><span id="pageNumber">01 / 10</span></div>
+      <div id="noteEditor" class="note-content" contenteditable="false"></div>
+      <div id="editHint" class="edit-hint" hidden>目前為「編輯說明」模式：可直接點選上方文字增修課堂筆記，修改內容會自動暫存於瀏覽器，按右上角「💾 匯出更新 HTML」即可另存新檔。</div>
+    </section>
+  </main>
+</div>
+
+
+
+<footer class="site-footer"><span>© __PAGES_BUILD_YEAR__ yucs. 版權所有。</span><span id="exportStamp">程式部署時間：<time datetime="__PAGES_BUILD_DATETIME__">__PAGES_BUILD_TIME__</time></span><span class="keyboard-hint">← → 翻頁 · Space 播放／暫停 · Ctrl＋滾輪縮放</span></footer>
+
+<script id="pagesData" type="application/json">[{"id":"p01","chapter":"單元 1 · 控制方式與符號","title":"認識 FET：電場控制通道","mode":"u1_intro","mediaLabel":"BJT vs FET 動態對照 ＆ 六大電路符號 X 光透視鏡","notesHtml":"\u003cp class=\"lesson-lead\">FET 用閘源電壓改變通道的導電能力。先分辨結構，再判斷載子與電流方向。\u003c/p>\u003ch3>先操作，再比較\u003c/h3>\u003col>\u003cli>比較 BJT 的基極驅動與 FET 的閘極電場。\u003c/li>\u003cli>逐一切換 JFET、D-MOSFET、E-MOSFET，再切換 N／P 通道。\u003c/li>\u003cli>開啟結構透視與簡化符號，確認箭頭畫在哪一個端點。\u003c/li>\u003c/ol>\u003ch3>三個辨識線索\u003c/h3>\u003cul>\u003cli>\u003cb>閘極結構：\u003c/b>JFET 是接面閘極；MOSFET 的閘極與半導體之間有絕緣層。\u003c/li>\u003cli>\u003cb>通道線：\u003c/b>本教材以實線表示預建通道，以分段線表示增強型通道。\u003c/li>\u003cli>\u003cb>箭頭位置：\u003c/b>先確認符號版本，再使用 N／P 通道口訣；不可只記朝內或朝外。\u003c/li>\u003c/ul>\u003ch3>載子與傳統電流\u003c/h3>\u003cp>N 通道以電子導電；正常偏壓下電子由 S → D，傳統電流由 D → S。P 通道以電洞導電，正常偏壓與電流方向隨之反轉。\u003c/p>\u003cp>低頻分析常以 I\u003csub>C\u003c/sub> ≈ βI\u003csub>B\u003c/sub> 描述 BJT；FET 則以 V\u003csub>GS\u003c/sub> 與 I\u003csub>D\u003c/sub> 的關係描述控制效果。\u003c/p>\u003ch3>適用範圍\u003c/h3>\u003cp>「閘極幾乎不取電流」是穩態近似。MOSFET 切換時仍須替閘極電容充放電，也存在漏電流；不代表驅動完全不耗能。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>如果閘極隔開、通道為分段線，屬於哪一類？答案：增強型 MOSFET；N／P 還要看箭頭。\u003c/div>","observation":"切換六種符號，找出閘極間隙、通道線與箭頭的差別。"},{"id":"p02","chapter":"單元 2 · 接面與空乏區","title":"JFET：逆偏使通道變窄","mode":"u2_jfet","mediaLabel":"JFET 內部空乏區即時擠壓動畫（支援 N/P 通道與電子流／傳統電流切換）","notesHtml":"\u003cp class=\"lesson-lead\">JFET 在零閘源偏壓時已有通道。閘極接面的逆向偏壓增加，會擴大空乏區，降低導電能力。\u003c/p>\u003ch3>三步觀察\u003c/h3>\u003col>\u003cli>選 N 通道，從 V\u003csub>GS\u003c/sub> = 0 V 開始。\u003c/li>\u003cli>逐步降低 V\u003csub>GS\u003c/sub>，比較空乏區寬度、載子動畫與電流讀值。\u003c/li>\u003cli>切成 P 通道，確認偏壓符號與載子種類的改變。\u003c/li>\u003c/ol>\u003ch3>用公式連接圖像\u003c/h3>\u003cp>在飽和區、忽略通道長度調變時：\u003c/p>\u003cp class='formula'>I\u003csub>D\u003c/sub> = I\u003csub>DSS\u003c/sub>(1 − V\u003csub>GS\u003c/sub> / V\u003csub>P\u003c/sub>)²\u003c/p>\u003cp>N 通道取 V\u003csub>P\u003c/sub> = V\u003csub>GS(off)\u003c/sub> &lt; 0；正常控制範圍為 V\u003csub>P\u003c/sub> ≤ V\u003csub>GS\u003c/sub> ≤ 0。超出範圍時不可直接延用平方公式。\u003c/p>\u003ch3>零偏壓不等於任何時候都流 IDSS\u003c/h3>\u003cp>I\u003csub>DSS\u003c/sub> 指 V\u003csub>GS\u003c/sub> = 0 且 V\u003csub>DS\u003c/sub> 足以進入飽和區時的電流。若 V\u003csub>DS\u003c/sub> = 0，沒有汲源驅動電壓，I\u003csub>D\u003c/sub> 仍為零。\u003c/p>\u003ch3>接面限制\u003c/h3>\u003cp>JFET 正常操作讓閘極 PN 接面逆偏。順偏會產生閘極電流；示意警示的電壓不是所有元件通用的安全界限。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>VGS = VP / 2 時，在上述模型下 ID = IDSS / 4；不是 IDSS / 2。\u003c/div>","observation":"把 N 通道的 VGS 從 0 V 調向負值，觀察通道與 ID。"},{"id":"p03","chapter":"單元 3 · 通道電位與飽和區","title":"夾止與截止：兩種不同狀態","mode":"u3_pinchoff","mediaLabel":"雙滑桿連動：通道電位探針、楔形空乏區與「夾止強電場瀑布」加速動畫","notesHtml":"\u003cp class=\"lesson-lead\">汲極端的局部夾止不等於整個元件截止。先固定一個變數，才能看懂兩種狀態的差別。\u003c/p>\u003ch3>依序調整兩個電壓\u003c/h3>\u003col>\u003cli>固定 V\u003csub>GS\u003c/sub>，從低 V\u003csub>DS\u003c/sub> 觀察源極、中段與汲極附近電位。\u003c/li>\u003cli>提高 V\u003csub>DS\u003c/sub>，比較汲極端空乏區與輸出曲線。\u003c/li>\u003cli>再降低 V\u003csub>GS\u003c/sub> 至截止，對照電流是否消失。\u003c/li>\u003c/ol>\u003ch3>為什麼汲極端先變窄？\u003c/h3>\u003cp>通道電位從源極向汲極改變。在 N 通道中，靠近汲極的閘極接面承受較大的逆偏，因此空乏區較寬。\u003c/p>\u003cp class='formula'>V\u003csub>DS(sat)\u003c/sub> ≈ V\u003csub>GS\u003c/sub> − V\u003csub>P\u003c/sub>\u003c/p>\u003cp>此邊界用於尚未截止的 N 通道 JFET 理想模型。\u003c/p>\u003ch3>用瀑布理解，但別把比喻當實物\u003c/h3>\u003cp>局部夾止附近的高電場可將載子掃向汲極。通道前段仍供應載子，因此電流不會因汲極端夾止而突然歸零；理想飽和電流主要由 V\u003csub>GS\u003c/sub> 決定。\u003c/p>\u003ch3>與 BJT 名稱對照\u003c/h3>\u003cp>FET 用於低壓降導通開關時通常在歐姆區；作放大器時常偏壓於飽和區。BJT 的低壓降導通則稱飽和，名稱不能直接套用。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>VDS 增加造成局部夾止，不表示 ID 一定等於 IDSS；還要看 VGS。\u003c/div>","observation":"固定 VGS，再增加 VDS，觀察汲極附近先發生什麼變化。"},{"id":"p04","chapter":"單元 4 · 預建通道的雙向控制","title":"D-MOSFET：空乏與增強","mode":"u4_dmos","mediaLabel":"D-MOSFET 橫截面載子模擬（SiO₂ 玻璃絕緣 · 負偏壓空乏 ← 0V → 正偏壓增強）","notesHtml":"\u003cp class=\"lesson-lead\">空乏型 MOSFET 已有通道，又有絕緣閘極，因此能在適當偏壓下減少或增加通道載子。\u003c/p>\u003ch3>以 N 通道為例\u003c/h3>\u003col>\u003cli>V\u003csub>GS\u003c/sub> = 0：預建通道可導電。\u003c/li>\u003cli>V\u003csub>GS\u003c/sub> &lt; 0：空乏作用減少通道電子，電流降低。\u003c/li>\u003cli>V\u003csub>GS\u003c/sub> &gt; 0：增強作用增加通道電子，電流可高於零偏壓值。\u003c/li>\u003c/ol>\u003ch3>與 JFET 相同與不同之處\u003c/h3>\u003cp>兩者都屬於零閘源偏壓可導電的元件，教材也用相同形式的轉移模型。差別在於 MOSFET 的閘極被氧化層隔開，正閘壓不會像 JFET 那樣直接讓閘極 PN 接面順偏。\u003c/p>\u003ch3>計算練習\u003c/h3>\u003cp>在飽和區取 I\u003csub>DSS\u003c/sub> = 8 mA、V\u003csub>P\u003c/sub> = −4 V，若 V\u003csub>GS\u003c/sub> = +1 V：\u003c/p>\u003cp class='formula'>I\u003csub>D\u003c/sub> = 8 × [1 − 1/(−4)]² = 12.5 mA\u003c/p>\u003cp>這是指定參數的教學近似，不是特定型號的保證電流。\u003c/p>\u003ch3>絕緣層仍有額定限制\u003c/h3>\u003cp>可施加正負閘壓，不代表電壓無上限。實作仍須遵守 V\u003csub>GS\u003c/sub>、電流、功耗及靜電防護規格。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>D-MOSFET 的「D」在本教材指 depletion（空乏型），不要與製程名稱 DMOS 混淆。\u003c/div>","observation":"讓 VGS 依序經過負值、0 V、正值，比較通道載子濃度。"},{"id":"p05","chapter":"單元 5 · 臨界電壓與 LED 開關","title":"E-MOSFET：形成反轉通道","mode":"u5_emos","mediaLabel":"E-MOSFET 感應 N 型反轉層造橋動畫 ＆ 外部 5V LED 開關電路連動","notesHtml":"\u003cp class=\"lesson-lead\">增強型 MOSFET 沒有預建的導電通道。閘極電場改變表面載子分布，形成連接源極與汲極的反轉層。\u003c/p>\u003ch3>反轉層如何形成\u003c/h3>\u003col>\u003cli>N 通道元件的正閘壓先排斥表面電洞。\u003c/li>\u003cli>表面逐漸空乏，再累積電子形成反轉層。\u003c/li>\u003cli>有適當 V\u003csub>DS\u003c/sub> 時，源極供應的電子經通道移向汲極。\u003c/li>\u003c/ol>\u003ch3>先判斷工作區\u003c/h3>\u003cp>令過驅電壓 V\u003csub>OV\u003c/sub> = V\u003csub>GS\u003c/sub> − V\u003csub>T\u003c/sub>。理想 N 通道模型：\u003c/p>\u003cul>\u003cli>V\u003csub>GS\u003c/sub> ≤ V\u003csub>T\u003c/sub>：視為截止。\u003c/li>\u003cli>0 ≤ V\u003csub>DS\u003c/sub> &lt; V\u003csub>OV\u003c/sub>：歐姆區。\u003c/li>\u003cli>V\u003csub>DS\u003c/sub> ≥ V\u003csub>OV\u003c/sub>：飽和區。\u003c/li>\u003c/ul>\u003ch3>超過 VT 不等於已充分導通\u003c/h3>\u003cp>V\u003csub>GS(th)\u003c/sub> 只表示資料表指定小電流下的臨界條件。選擇開關驅動電壓時，要看 R\u003csub>DS(on)\u003c/sub> 在什麼 V\u003csub>GS\u003c/sub> 下有規格。\u003c/p>\u003cp>本教材 LED 與電流是簡化示意；實際接線需限流電阻，閘極也不能長期浮接。\u003c/p>\u003ch3>BS170 的型號與封裝\u003c/h3>\u003cp>本版實習模型採 onsemi BS170 TO-92 的 D–G–S 腳序。實際拿到的元件仍須確認製造商、封裝視角與資料表，不能套用所有 TO-92 元件。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>開關要低壓降導通，應給足閘極驅動並讓工作點落在低 VDS 的歐姆區。\u003c/div>","observation":"把 VGS 調過 VT，觀察反轉層、電流與 LED 的連動。"},{"id":"p06","chapter":"單元 6 · 轉移、輸出與互導","title":"雙曲線：從偏壓找到工作點","mode":"u6_curves","mediaLabel":"轉移曲線 ID-VGS ⟷ 輸出特性曲線 ID-VDS 同步雷射對齊實驗室（含三大家族同框 PK）","notesHtml":"\u003cp class=\"lesson-lead\">轉移曲線回答閘壓如何控制電流；輸出曲線回答汲源電壓如何影響電流。兩張圖描述同一個工作點。\u003c/p>\u003ch3>操作順序\u003c/h3>\u003col>\u003cli>選擇元件家族，調整 V\u003csub>GS\u003c/sub>，追蹤兩圖上的 I\u003csub>D\u003c/sub>。\u003c/li>\u003cli>固定 V\u003csub>GS\u003c/sub>，調整 V\u003csub>DS\u003c/sub>，觀察歐姆區與飽和區。\u003c/li>\u003cli>開啟電氣數值，閱讀 g\u003csub>m\u003c/sub>；切換三家族比較模式。\u003c/li>\u003c/ol>\u003ch3>E-MOSFET 的分段模型\u003c/h3>\u003cp>本教材採 I\u003csub>D,sat\u003c/sub> = K(V\u003csub>GS\u003c/sub> − V\u003csub>T\u003c/sub>)² 的 K 定義；忽略 λ：\u003c/p>\u003cp class='formula'>歐姆區：I\u003csub>D\u003c/sub> = K[2(V\u003csub>GS\u003c/sub> − V\u003csub>T\u003c/sub>)V\u003csub>DS\u003c/sub> − V\u003csub>DS\u003c/sub>²]\u003c/p>\u003cp class='formula'>飽和區：g\u003csub>m\u003c/sub> = 2K(V\u003csub>GS\u003c/sub> − V\u003csub>T\u003c/sub>)\u003c/p>\u003cp>其他教材可能把 1/2 包在不同參數中，使用前要先對照定義。\u003c/p>\u003ch3>工作區優先的例題\u003c/h3>\u003cp>V\u003csub>T\u003c/sub> = 2 V、K = 1 mA/V²、V\u003csub>GS\u003c/sub> = 5 V、V\u003csub>DS\u003c/sub> = 2 V。邊界為 3 V，故工作於歐姆區：\u003c/p>\u003cp class='formula'>I\u003csub>D\u003c/sub> = 1 × [2 × 3 × 2 − 2²] = 8 mA\u003c/p>\u003ch3>互導的意義\u003c/h3>\u003cp>g\u003csub>m\u003c/sub> 是固定 V\u003csub>DS\u003c/sub> 下，I\u003csub>D\u003c/sub> 對 V\u003csub>GS\u003c/sub> 的局部斜率，單位為 A/V（S）。它隨工作點改變，不是整張曲線共用一個固定增益。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>先判斷截止／歐姆／飽和，再選公式；不能看到 MOSFET 就直接套平方律。\u003c/div>","observation":"先固定 VDS 調 VGS，再固定 VGS 調 VDS，比較兩張曲線。"},{"id":"p07","chapter":"單元 7 · 通道調變、體二極體與 ESD","title":"進階效應與接線故障","mode":"u7_adv","mediaLabel":"三大進階與實習破壞實驗室（切換下方 3 組實驗標籤親手操作！）","notesHtml":"\u003cp class=\"lesson-lead\">真實元件與理想模型有差距。觀察現象時，要分清楚是工作特性、接線方向，還是元件受損。\u003c/p>\u003ch3>實驗一：通道長度調變\u003c/h3>\u003cp>調大 λ，觀察飽和區輸出曲線由接近水平變成略為上升。汲極端夾止區延伸，使有效通道長度縮短。\u003c/p>\u003cp class='formula'>I\u003csub>D\u003c/sub> ≈ I\u003csub>D0\u003c/sub>(1 + λV\u003csub>DS\u003c/sub>)\u003c/p>\u003cp>這是局部近似；線性外推的交點不代表可以實際操作到該電壓。\u003c/p>\u003ch3>實驗二：體二極體\u003c/h3>\u003cp>常見三端離散 N-MOSFET 的 body 與 S 相連，形成由 S 指向 D 的寄生體二極體。低側開關把 D、S 接反時，負載可能經體二極體導通，閘極無法關掉這條路徑。\u003c/p>\u003ch3>實驗三：靜電損傷\u003c/h3>\u003cp>觸發模擬故障，觀察閘極絕緣失效後的結果，再按復原。這是電路故障示意，不是實際擊穿電壓或損傷機率的量測模型。\u003c/p>\u003ch3>實作前的判讀\u003c/h3>\u003cp>先斷電核對 D／G／S、共地與負載限流，再量測。不要用手指帶電觸碰閘極來重現 ESD；感性負載還需要適當的續流與突波處理。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>VGS = 0 而負載仍導通，不能直接判定閘極失效；先檢查 D／S 方向與其他電流路徑。\u003c/div>","observation":"依序切換三個實驗，分辨正常非理想效應、接反與損壞。"},{"id":"p08","chapter":"單元 8 · 量測原理","title":"接腳量測原理：接面與導通路徑","mode":"u8_pinlab","mediaLabel":"原理圖解：閘極接面、絕緣層與體二極體","notesHtml":"\u003cp class=\"lesson-lead\">先用結構預測電表讀值，再以量測紀錄檢查推論。實際操作已移到獨立 HTML。\u003c/p>\u003ch3>JFET\u003c/h3>\u003cp>找共同的接面端作為 G 候選腳，再以電阻檔確認另兩腳的通道。D、S 的區分仍需資料表或進一步測試。\u003c/p>\u003ch3>MOSFET\u003c/h3>\u003cp>G 與通道絕緣。常見三端離散元件的 body 接 S：N 通道體二極體由 S 指向 D，P 通道由 D 指向 S。\u003c/p>\u003ch3>充放電\u003c/h3>\u003cp>BS170 用正 VGS、BS250 用負 VGS 形成導通狀態；G-S 短路放電後，再看未充電的體二極體。\u003c/p>\u003ch3>操作順序\u003c/h3>\u003col>\u003cli>在實作頁選擇元件。\u003c/li>\u003cli>選擇電表與檔位。\u003c/li>\u003cli>量六組正反方向，必要時充放電後重測。\u003c/li>\u003c/ol>\u003cdiv class=\"checkpoint\">讀值為教學模型；真實元件腳序、電表極性與測試條件以資料表為準。\u003c/div>","observation":"比較 JFET 與 MOSFET 的導通路徑，再開啟獨立工作台練習。"},{"id":"p09","chapter":"單元 9 · 比較表與測驗","title":"整理、提問與十題自我檢核","mode":"u8_quiz","mediaLabel":"互動學習檢核中心（比較總表 ／ 學生視角 Q&A 翻卡 ／ 10 題統測＆實習即時批改測驗）","notesHtml":"\u003cp class=\"lesson-lead\">把結構、偏壓、工作區和量測現象串在一起。答對選項之後，還要能指出公式或判斷成立的條件。\u003c/p>\u003ch3>第一輪：比較三個家族\u003c/h3>\u003cp>用比較表確認三件事：是否有預建通道、閘極如何隔離、正常偏壓範圍為何。切換 N／P 通道時，同時檢查電壓符號與電流方向。\u003c/p>\u003ch3>第二輪：解開七個疑問\u003c/h3>\u003cp>問題卡涵蓋夾止與截止、反轉層、符號箭頭、開關工作區、雙模式控制、閘極浮接與電表量測。先口頭回答，再展開卡片核對。\u003c/p>\u003ch3>第三輪：完成十題\u003c/h3>\u003cp>測驗即時顯示答對數與解析。綠框表示正確選項，紅框表示選錯的選項，並保留文字回饋；可重新選答，適合課堂討論。\u003c/p>\u003ch3>算式檢查順序\u003c/h3>\u003col>\u003cli>辨認 N／P 通道及元件家族。\u003c/li>\u003cli>確認偏壓符號與工作區。\u003c/li>\u003cli>選公式並檢查 K 的定義。\u003c/li>\u003cli>檢查單位，以及結果是否符合曲線趨勢。\u003c/li>\u003c/ol>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>若算出的 ID 與動畫趨勢相反，先查偏壓符號與工作區，不要只重按計算機。\u003c/div>","observation":"先作答，再展開解析；用一句話說明自己判斷的依據。"},{"id":"p10","chapter":"單元 10 · 舊版素材參考","title":"影片回顧與原理圖卡","mode":"u9_video","mediaLabel":"Full HD 繁體中文旁白動畫影片播放器（支援 7 大章節一鍵跳轉）","notesHtml":"\u003cp class=\"lesson-lead\">此處保留原專案的影片與六張圖卡，方便離線授課。它們沒有重新配音或重繪，內容以 V2 文字的更正說明為準。\u003c/p>\u003ch3>影片使用方式\u003c/h3>\u003cp>用下方章節按鈕跳轉，或直接拖曳播放器時間軸。離開本單元會暫停影片，避免在背景繼續播放。\u003c/p>\u003ch3>六張圖卡的用途\u003c/h3>\u003cp>依序涵蓋家族與符號、JFET 夾止、兩種 MOSFET、雙曲線、進階效應與腳位量測。點圖可在新分頁開啟原圖。\u003c/p>\u003ch3>舊素材的閱讀限制\u003c/h3>\u003cp>圖卡、PDF 與影片保留原版；其中的通用化腳序、固定量測值及假貨判定，不視為已完成原廠核對或實測驗證。尤其 BS170 腳位請看本版單元 8。\u003c/p>\u003ch3>下載與離線攜帶\u003c/h3>\u003cp>\u003ca href='./FET_JFET_MOSFET_原理圖文講義.pdf' target='_blank' rel='noopener'>開啟原版 PDF 講義（未重製）\u003c/a>\u003c/p>\u003cp>搬移時複製整個 V2 資料夾，保留 index.html、影片、diagrams 與 PDF 的相對位置。\u003c/p>\u003cdiv class=\"checkpoint\">\u003cb>學習檢核\u003c/b>\u003cbr>能看懂影片之後，再回到互動單元調整參數，確認自己能預測變化。\u003c/div>","observation":"選一個章節觀看，再回到對應單元操作並說明因果關係。"}]</script>
+<script id="qaData" type="application/json">
+[
+  {
+    "q": "Q1：夾止後為什麼還有電流？",
+    "a": "汲極附近的局部夾止區有高電場，能掃掠通道送來的載子。理想飽和電流主要由 VGS 決定；VGS 降到截止才是另一種狀態，夾止不代表 ID 必為 IDSS。"
+  },
+  {
+    "q": "Q2：反轉層的電子從哪裡來？",
+    "a": "閘極電場改變表面的能帶與載子分布。正常導電時源極可供應電子，並不是電場憑空製造電子；示意圖的造橋比喻用來說明通道形成。"
+  },
+  {
+    "q": "Q3：為什麼有些 N-MOS 箭頭看起來方向不同？",
+    "a": "先確認箭頭位於基體還是源極，以及採用哪一種符號。不要混用不同畫法的朝內／朝外口訣；應以端點名稱、符號定義和資料表確認。"
+  },
+  {
+    "q": "Q4：MOSFET 導通開關應工作在哪一區？",
+    "a": "低壓降導通通常在歐姆區。需依資料表給足閘極驅動並檢查 RDS(on)、電流與散熱；超過 VT 不代表已充分導通。"
+  },
+  {
+    "q": "Q5：為什麼 D-MOSFET 可正偏增強，JFET 不宜？",
+    "a": "N-JFET 的閘極是 PN 接面，正向偏壓會引起閘極電流。D-MOSFET 有絕緣閘極，可在額定範圍內正偏增強，但仍有氧化層耐壓與漏電限制。"
+  },
+  {
+    "q": "Q6：閘極沒接訊號，LED 為什麼會不穩定？",
+    "a": "閘極浮接時，殘留電荷與耦合雜訊可能改變 VGS。用合適的 G-S 偏壓電阻建立確定狀態，並確認共地與驅動；阻值需依雜訊、速度和驅動能力選定。"
+  },
+  {
+    "q": "Q7：電表量測能直接判定腳位與真偽嗎？",
+    "a": "量測可協助辨識接面、通道與絕緣特徵，但受電表電壓、元件狀態和閘極電荷影響。JFET 的 D／S、特定封裝腳序及元件真偽，需要額外資料與測試確認。"
+  }
+]
+</script>
+<script id="quizData" type="application/json">
+[
+  {
+    "q": "1.【符號秒殺】觀察一個場效電晶體符號：「閘極 G 與通道隔開一道縫隙、通道畫成三段虛線、中間基體 B 箭頭指向通道內」。請問它是哪一種元件？",
+    "opts": [
+      "N 通道 JFET",
+      "N 通道 D-MOSFET（空乏型）",
+      "N 通道 E-MOSFET（增強型）",
+      "P 通道 E-MOSFET（增強型）"
+    ],
+    "ans": 2,
+    "exp": "閘極隔開＝MOSFET；三段虛線＝天生無通道需增強造橋（E-MOS）；中間基體箭頭代表 P→N，指向通道內代表通道為 N 型，故為 N 通道 E-MOSFET！"
+  },
+  {
+    "q": "2.【JFET 肖克利速算】某 N 通道 JFET 之 IDSS = 12 mA、夾止電壓 VP = -4 V。當施加閘極電壓 VGS = -2 V 且工作於飽和區時，汲極電流 ID 為多少？",
+    "opts": [
+      "0 mA",
+      "3 mA",
+      "6 mA",
+      "9 mA"
+    ],
+    "ans": 1,
+    "exp": "代入肖克利方程式：ID = IDSS × (1 − VGS / VP)² = 12 × (1 − (-2)/(-4))² = 12 × (0.5)² = 12 × 0.25 = 3 mA！（熟記 VGS = 0.5 VP 時 ID = 1/4 IDSS 可一秒秒殺！）"
+  },
+  {
+    "q": "3.【D-MOS 雙向模式】承上概念，某 N 通道 D-MOSFET 之 IDSS = 8 mA、VP = -4 V。若改施加正電壓 VGS = +1 V（飽和區），此時工作於何種模式？ID 為多少？",
+    "opts": [
+      "空乏模式，ID = 4.5 mA",
+      "增強模式，ID = 10 mA",
+      "增強模式，ID = 12.5 mA",
+      "PN 接面順偏燒毀，無法工作"
+    ],
+    "ans": 2,
+    "exp": "在題設飽和區模型及額定偏壓範圍內，正 VGS 為增強模式。ID = 8 × [1 − 1/(−4)]² = 12.5 mA。"
+  },
+  {
+    "q": "4.【統測經典陷阱：工作區判別】某 N 通道 E-MOSFET 臨界電壓 VT = 2 V、參數 K = 1 mA/V²。若偏壓於 VGS = 5 V、VDS = 2 V，此時工作於哪一區？電流 ID 為何？",
+    "opts": [
+      "飽和區，ID = 9 mA",
+      "歐姆區，ID = 8 mA",
+      "歐姆區，ID = 4 mA",
+      "截止區，ID = 0 mA"
+    ],
+    "ans": 1,
+    "exp": "先算夾止邊界 VDS(sat) = VGS − VT = 5 − 2 = 3 V！題目 VDS = 2 V \u003c 3 V，尚未夾止，位於【歐姆區】（千萬別直接代 9mA）！代入歐姆區公式：ID = K[2(VGS−VT)VDS − VDS²] = 1 × [2(3)(2) − 2²] = 12 − 4 = 8 mA！"
+  },
+  {
+    "q": "5.【開關工作區】若要讓 E-MOSFET 作為低壓降導通的電子開關，通常應讓它工作於哪一區？",
+    "opts": [
+      "飽和區（夾止區）",
+      "歐姆區（三極管線性電阻區）",
+      "截止區",
+      "崩潰區"
+    ],
+    "ans": 1,
+    "exp": "FET 的【歐姆區】位於低 VDS 左側斜坡，給足夠大的 VGS 可讓 RDS(on) 極小、VDS 接近 0V，相當於閉合開關！（FET 的飽和區則是高 VDS 的定電流放大區，名稱與 BJT 剛好相反！）"
+  },
+  {
+    "q": "6.【互導 gm 計算】某 N 通道 E-MOSFET 之 VT = 2 V、K = 0.5 mA/V²，工作於 VGS = 6 V 之飽和區。請問該工作點的小訊號互導 gm 為多少？",
+    "opts": [
+      "2 mA/V (mS)",
+      "4 mA/V (mS)",
+      "8 mA/V (mS)",
+      "16 mA/V (mS)"
+    ],
+    "ans": 1,
+    "exp": "E-MOS 飽和區互導公式：gm = dID / dVGS = 2K(VGS − VT) = 2 × 0.5 × (6 − 2) = 4 mA/V（即 4 mS）！"
+  },
+  {
+    "q": "7.【進階物理：通道長度調變】在實際 MOSFET 輸出特性曲線中，飽和區的 ID 隨 VDS 增加而微幅線性上揚（斜率不為 0），主要物理原因為何？",
+    "opts": [
+      "SiO₂ 玻璃層發生漏電流",
+      "夾止點隨 VDS 增加往源極微退，使有效通道長度 L' 縮短",
+      "P 型基底電洞大量湧入閘極",
+      "臨界電壓 VT 隨 VDS 變大而升高"
+    ],
+    "ans": 1,
+    "exp": "VDS 加大時汲極端空乏區擴大，將夾止點往源極推進 ΔL，有效通道長度 L' = L − ΔL 變短，電阻微降使 ID 微幅上翹，稱為通道長度調變效應（λ）！"
+  },
+  {
+    "q": "8.【實習除錯實戰】同學在麵包板用三腳 N-MOSFET（BS170）接低側開關控制 +5V LED，結果發現就算把閘極 G 直接接地（VGS = 0V），LED 依然亮著關不掉（且元件沒壞）！最可能的原因是？",
+    "opts": [
+      "電源電壓 5V 太低",
+      "限流電阻用了 1kΩ 太大",
+      "把汲極 D 與源極 S 兩隻腳插反了，導致內部寄生體二極體順偏導通",
+      "忘記把閘極懸空"
+    ],
+    "ans": 2,
+    "exp": "單體三腳 MOSFET 內部基體 B 與源極 S 短接，形成 S→D 的寄生體二極體（Body Diode）。若把 D、S 插反（S 接高電位、D 接地），體二極體直接順偏 0.7V 導通，閘極怎麼關都關不掉！"
+  },
+  {
+    "q": "9.【實習接腳判斷】用數位電表二極體檔量 TO-92 的 FET：腳 2 接紅棒(+)時，對腳 1、腳 3 都導通約 0.7V；腳 1、3 之間用 Ω 檔正反皆有數百 Ω。此元件最可能是？",
+    "opts": [
+      "N 通道 JFET，G＝腳 2",
+      "P 通道 JFET，G＝腳 2",
+      "N 通道 E-MOSFET，G＝腳 2",
+      "NPN BJT，B＝腳 2"
+    ],
+    "ans": 0,
+    "exp": "共同正極接面端支持 N 通道 JFET 的判斷；另兩腳的雙向通道電阻提供交叉證據。實物仍需核對資料表，簡單靜態量測未必能區分 D 與 S。"
+  },
+  {
+    "q": "10.【電表極性】本模擬指針表歐姆檔設定為黑棒正、紅棒負。要讓 N 通道 JFET 的 G-S 接面順偏，探棒如何接？",
+    "opts": [
+      "紅棒接 G、黑棒接 S",
+      "黑棒接 G、紅棒接 S",
+      "兩支都可以，因為二極體雙向導通",
+      "必須改用電壓檔"
+    ],
+    "ans": 1,
+    "exp": "本模型黑棒為正，因此黑棒接 P 型閘極 G、紅棒接 S。實際電表須先查所用檔位的測試極性。"
+  }
+]
+</script>
+<script>
+(function(){
+  "use strict";
+
+  const pages = JSON.parse(document.getElementById("pagesData").textContent);
+  const STUDENT_QA = JSON.parse(document.getElementById("qaData").textContent);
+  const QUIZ_DATA = JSON.parse(document.getElementById("quizData").textContent);
+  const DRAFT_KEY = "yucs_fet_studio_notes_v2_2";
+
+  try {
+    const saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null");
+    if (saved && typeof saved === "object") {
+      pages.forEach(p => { if (typeof saved[p.id] === "string") p.notesHtml = saved[p.id]; });
+    }
+  } catch (_) {}
+
+  const state = {
+    pageIndex: 0,
+    playing: true,
+    speed: 1,
+    showValues: false,
+    editing: false,
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    flowMode: "carrier", // "carrier" | "conv" | "both"
+
+    // Unit 1
+    u1Fam: "jfet",
+    u1NChan: true,
+    u1Xray: true,
+    u1Simp: false,
+
+    // Unit 2
+    u2NChan: true,
+    u2Vgs: -1.2,
+
+    // Unit 3
+    u3Vgs: -1.0,
+    u3Vds: 5.0,
+
+    // Unit 4
+    u4Vgs: 1.2,
+
+    // Unit 5
+    u5Vgs: 3.8,
+    u5Pinout: false,
+
+    // Unit 6
+    u6Dev: "emos",
+    u6Vgs: 4.5,
+    u6Vds: 5.0,
+
+    // Unit 7
+    u7Tab: "clm",
+    u7Lambda: 0.03,
+    u7Vds: 6.5,
+    u7Reversed: false,
+    u7Vgs: 0.0,
+    u7Zener: false,
+    u7EsdBlown: false,
+
+    // Unit 8
+    u8Sub: "table",
+    u8NChan: true,
+    u8OpenQa: { 0: true },
+    u8Answers: {}
+  };
+
+  const canvasStage = document.getElementById("canvasStage");
+  const diagBanner = document.getElementById("diagBanner");
+  const statusPill = document.getElementById("statusPill");
+  const presetBar = document.getElementById("presetBar");
+  const cameraControls = document.getElementById("cameraControls");
+  const noteEditor = document.getElementById("noteEditor");
+
+  function setBanner(level, html) {
+    diagBanner.className = "diag-banner " + level;
+    diagBanner.innerHTML = `<div>${html}</div>`;
+  }
+
+  function setPill(kind, text) {
+    statusPill.className = "status-pill" + (kind === "fault" ? " fault" : (kind === "warn" ? " warn" : ""));
+    statusPill.textContent = text;
+  }
+
+  function applyZoomTransform() {
+    const target = canvasStage.firstElementChild;
+    document.getElementById("zoomLabel").textContent = Math.round(state.zoom * 100) + "%";
+    canvasStage.classList.toggle("pannable", state.zoom > 1.02);
+    if (!target || target.classList.contains("stage-scroll")) return;
+    target.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+    target.style.transformOrigin = "center center";
+  }
+
+  // =========================================================
+  // Physics Helpers & Shared SVG Primitives
+  // =========================================================
+  function svgDefs() {
+    return `<defs>
+      <marker id="arrBlue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,1 L9,5 L0,9 z" fill="#1d6fa5"/><path d="M2,5 L6,5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </marker>
+      <marker id="arrOrange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,1 L9,5 L0,9 z" fill="#c96a1b"/><path d="M2,5 L6,5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </marker>
+      <marker id="arrRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,1 L9,5 L0,9 z" fill="#d63939"/><path d="M2,5 L6,5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </marker>
+      <marker id="arrGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+        <path d="M0,1 L9,5 L0,9 z" fill="#5a2d82"/><path d="M2,5 L6,5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </marker>
+      <marker id="arrGold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,1 L9,5 L0,9 z" fill="#d97706"/><path d="M2,5 L6,5" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+      </marker>
+      <linearGradient id="sio2Grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fef08a"/>
+        <stop offset="100%" stop-color="#fde047"/>
+      </linearGradient>
+      <linearGradient id="waterfallGrad" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0%" stop-color="#fde047" stop-opacity="0.18"/>
+        <stop offset="55%" stop-color="#f59e0b" stop-opacity="0.58"/>
+        <stop offset="100%" stop-color="#ef4444" stop-opacity="0.82"/>
+      </linearGradient>
+      <radialGradient id="ledGlowRed" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.95"/>
+        <stop offset="55%" stop-color="#ef4444" stop-opacity="0.45"/>
+        <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+      </radialGradient>
+    </defs>`;
+  }
+
+  function drawSymbolSVG(cx, cy, scale, fam, nChan, xray, simplified) {
+    const cArr = nChan ? "#1d6fa5" : "#c96a1b";
+    const cBody = nChan ? "#5a2d82" : "#b85d19";
+    let g = `<g transform="translate(${cx},${cy}) scale(${scale})">`;
+    if (xray && !simplified) {
+      if (fam === "jfet") {
+        g += `<rect x="-12" y="-42" width="28" height="84" rx="5" fill="${nChan ? '#dbeafe' : '#ffedd5'}" stroke="#94a3b8" stroke-dasharray="3 2"/>
+              <rect x="-34" y="-22" width="22" height="44" rx="4" fill="${nChan ? '#fecaca' : '#bae6fd'}" opacity="0.75"/>
+              <text x="2" y="-76" text-anchor="middle" font-size="9.5" fill="#475569" font-weight="700">透視：${nChan ? 'P+閘極 夾 N通道' : 'N+閘極 夾 P通道'}</text>`;
+      } else {
+        g += `<rect x="-26" y="-34" width="11" height="68" rx="2" fill="#fde047" stroke="#ca8a04" opacity="0.85"/>
+              <rect x="-15" y="-38" width="28" height="76" rx="4" fill="${nChan ? '#fee2e2' : '#dbeafe'}" opacity="0.65"/>
+              ${fam === "dmos" ? `<rect x="-15" y="-34" width="10" height="68" fill="${nChan ? '#93c5fd' : '#fdba74'}" opacity="0.9"/>` : ""}
+              <text x="0" y="-47" text-anchor="middle" font-size="9.5" fill="#854d0e" font-weight="700">黃色縫隙＝SiO₂ 玻璃絕緣層</text>`;
+      }
+    }
+    g += `<circle cx="0" cy="0" r="46" fill="${xray ? 'none' : '#fdfcff'}" stroke="${cBody}" stroke-width="2.6"/>`;
+    if (fam === "jfet") {
+      g += `<line x1="-8" y1="-30" x2="-8" y2="30" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round"/>
+            <polyline points="-8,-21 20,-21 20,-62" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <polyline points="-8,21 20,21 20,62" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <line x1="-64" y1="0" x2="-8" y2="0" stroke="#1e293b" stroke-width="2.8"/>`;
+      if (nChan) {
+        g += `<line x1="-38" y1="0" x2="-12" y2="0" stroke="${cArr}" stroke-width="3" marker-end="url(#arrBlue)"/>`;
+      } else {
+        g += `<line x1="-11" y1="0" x2="-38" y2="0" stroke="${cArr}" stroke-width="3" marker-end="url(#arrOrange)"/>`;
+      }
+      g += `<text x="-68" y="-6" text-anchor="end" font-size="13" font-weight="700" fill="#1e293b">G</text>`;
+    } else if (!simplified) {
+      // Standard 4-pin textbook symbol (Bulk tied to S)
+      g += `<polyline points="-64,20 -22,20 -22,-24" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <line x1="-22" y1="-26" x2="-22" y2="26" stroke="#1e293b" stroke-width="3.2"/>`;
+      if (fam === "dmos") {
+        g += `<line x1="-9" y1="-31" x2="-9" y2="31" stroke="#0f766e" stroke-width="4.6" stroke-linecap="round"/>`;
+      } else {
+        g += `<line x1="-9" y1="-31" x2="-9" y2="-13" stroke="#c2410c" stroke-width="4.4" stroke-linecap="round"/>
+              <line x1="-9" y1="-8" x2="-9" y2="8" stroke="#c2410c" stroke-width="4.4" stroke-linecap="round"/>
+              <line x1="-9" y1="13" x2="-9" y2="31" stroke="#c2410c" stroke-width="4.4" stroke-linecap="round"/>`;
+      }
+      g += `<polyline points="-9,-23 20,-23 20,-62" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <polyline points="-9,23 20,23 20,62" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <polyline points="-9,0 20,0 20,23" fill="none" stroke="#1e293b" stroke-width="2.6"/>
+            <circle cx="20" cy="23" r="3.3" fill="#1e293b"/>`;
+      if (nChan) {
+        g += `<line x1="18" y1="0" x2="-5" y2="0" stroke="${cArr}" stroke-width="2.8" marker-end="url(#arrBlue)"/>`;
+      } else {
+        g += `<line x1="-6" y1="0" x2="17" y2="0" stroke="${cArr}" stroke-width="2.8" marker-end="url(#arrOrange)"/>`;
+      }
+      g += `<text x="-68" y="24" text-anchor="end" font-size="13" font-weight="700" fill="#1e293b">G</text>
+            <text x="27" y="5" font-size="11" font-weight="700" fill="#64748b">B(接S)</text>`;
+    } else {
+      // Simplified 3-pin IC symbol (arrow on Source S = conventional current!)
+      g += `<line x1="-60" y1="0" x2="-22" y2="0" stroke="#1e293b" stroke-width="2.8"/>
+            <line x1="-22" y1="-26" x2="-22" y2="26" stroke="#1e293b" stroke-width="3.2"/>
+            <line x1="-9" y1="-29" x2="-9" y2="29" stroke="${fam === 'dmos' ? '#0f766e' : '#c2410c'}" stroke-width="4.2" ${fam === 'emos' ? 'stroke-dasharray="12 6"' : ''}/>
+            <polyline points="-9,-21 20,-21 20,-62" fill="none" stroke="#1e293b" stroke-width="2.8"/>
+            <polyline points="-9,21 20,21 20,62" fill="none" stroke="#1e293b" stroke-width="2.8"/>`;
+      if (nChan) {
+        g += `<line x1="-7" y1="21" x2="18" y2="21" stroke="#d63939" stroke-width="3" marker-end="url(#arrRed)"/>`;
+      } else {
+        g += `<line x1="19" y1="-21" x2="-5" y2="-21" stroke="#d63939" stroke-width="3" marker-end="url(#arrRed)"/>`;
+      }
+      g += `<text x="-64" y="4" text-anchor="end" font-size="13" font-weight="700" fill="#1e293b">G</text>`;
+    }
+    g += `<text x="28" y="-50" font-size="13" font-weight="700" fill="#1e293b">D</text>
+          <text x="28" y="56" font-size="13" font-weight="700" fill="#1e293b">S</text>
+        </g>`;
+    return g;
+  }
+
+  // =========================================================
+  // UNIT 1: BJT vs FET & 6 Symbols Interactive X-Ray
+  // =========================================================
+  function renderUnit1() {
+    const fam = state.u1Fam;
+    const nChan = state.u1NChan;
+    const famNames = { jfet: "JFET 接面場效電晶體", dmos: "D-MOSFET 空乏型金氧半", emos: "E-MOSFET 增強型金氧半" };
+    const chStr = nChan ? "N 通道" : "P 通道";
+
+    setBanner("ok", `目前檢視：<strong>${chStr} ${famNames[fam]}</strong> ｜ 閘極直流電流 <strong>IG ≒ 0 mA</strong>（${fam === 'jfet' ? '逆偏 PN 接面絕緣 ≈ 10⁹ Ω' : 'SiO₂ 玻璃絕緣層 ≈ 10¹³ Ω'}）`);
+    setPill("ok", `● 電壓電場控制 · ${chStr}`);
+
+    const gateNote = fam === "jfet"
+      ? "① 閘極直接連通道（PN 接面）"
+      : "① 閘極隔開一道縫（SiO₂ 玻璃層）";
+    const chanNote = fam === "emos"
+      ? "② 三段虛線：天生斷路（常閉，VGS 超過 VT 才造橋）"
+      : "② 連續實線：預建通道（VGS=0、飽和區時 ID≈IDSS）";
+    const arrNote = nChan
+      ? "③ 中間箭頭朝內 ◀（P 指向 N 通道）"
+      : "③ 中間箭頭朝外 ▶（N 通道指向 P）";
+
+    return `<svg viewBox="0 0 920 550" aria-label="BJT與FET比較及六大符號透視">
+      ${svgDefs()}
+      <!-- Left Card: BJT vs FET -->
+      <rect x="18" y="16" width="420" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="228" y="46" text-anchor="middle" font-size="17" font-weight="700" fill="#3a1a5c">一、為什麼從 BJT 進化到 FET？</text>
+
+      <!-- BJT Spring Door Box -->
+      <rect x="34" y="64" width="388" height="202" rx="11" fill="#fffaf0" stroke="#e9c88b" stroke-width="1.8"/>
+      <text x="50" y="90" font-size="14.5" font-weight="700" fill="#9a4d0a">🔧 BJT 雙極性電晶體（電流控制：出力推彈簧門）</text>
+      <!-- Pipe & Spring Door -->
+      <rect x="235" y="106" width="54" height="132" rx="6" fill="#fde68a" stroke="#b45309" stroke-width="2"/>
+      <line x1="82" y1="172" x2="228" y2="172" stroke="#f59e0b" stroke-width="4" stroke-dasharray="6 4"/>
+      <rect x="226" y="146" width="12" height="52" rx="3" fill="#b45309"/>
+      <text x="148" y="158" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b45309">必須持續灌 IB &gt; 0</text>
+      <text x="148" y="196" text-anchor="middle" font-size="11.5" fill="#78350f">手一放開彈簧門就關！</text>
+      <text x="348" y="148" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1e293b">IC = β · IB</text>
+      <text x="348" y="172" text-anchor="middle" font-size="11.5" fill="#64748b">Rin 僅數 kΩ</text>
+      <text x="348" y="194" text-anchor="middle" font-size="11.5" fill="#b91c1c">耗費前級驅動電流</text>
+
+      <!-- FET Electric Field Box -->
+      <rect x="34" y="282" width="388" height="234" rx="11" fill="#faf7fe" stroke="#d4bdf0" stroke-width="2"/>
+      <text x="50" y="308" font-size="14.5" font-weight="700" fill="#3a1a5c">⚡ FET 場效電晶體（電場隔空控制：IG ≒ 0 穩態近似）</text>
+      <!-- Gate Plate + Gap + Channel -->
+      <rect x="136" y="346" width="20" height="114" rx="4" fill="#334155"/>
+      <text x="118" y="405" text-anchor="end" font-size="13" font-weight="700" fill="#1e293b">閘極 G<tspan x="118" dy="17" fill="#0f766e">(加 VGS)</tspan></text>
+      <rect x="158" y="346" width="22" height="114" rx="3" fill="url(#sio2Grad)" stroke="#ca8a04" stroke-width="1.5"/>
+      <text x="169" y="337" text-anchor="middle" font-size="11" font-weight="700" fill="#a16207">絕緣阻隔 (IG≈0)</text>
+      <rect x="182" y="330" width="76" height="148" rx="7" fill="#dbeafe" stroke="#2563eb" stroke-width="2.2"/>
+      <text x="220" y="322" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">汲極 D</text>
+      <text x="220" y="496" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">源極 S (載子源頭)</text>
+      <!-- Electric Field Waves -->
+      <path d="M160,368 Q175,368 192,368 M160,403 Q175,403 192,403 M160,438 Q175,438 192,438" stroke="#d97706" stroke-width="2.4" marker-end="url(#arrGold)"/>
+      <text x="338" y="372" text-anchor="middle" font-size="13" font-weight="700" fill="#166534">電表量 G-S 近乎開路</text>
+      <text x="338" y="396" text-anchor="middle" font-size="12" fill="#334155">Rin = 10⁹ ～ 10¹⁴ Ω</text>
+      <text x="338" y="420" text-anchor="middle" font-size="12" fill="#0f766e" font-weight="700">單極性多數載子導電</text>
+      <text x="338" y="444" text-anchor="middle" font-size="11.5" fill="#64748b">電場控制 · 適合積體化</text>
+
+      <!-- Right Card: Interactive Symbol X-Ray -->
+      <rect x="454" y="16" width="448" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="678" y="46" text-anchor="middle" font-size="17" font-weight="700" fill="#3a1a5c">二、六大電路符號「三步秒殺」互動鏡</text>
+      <rect x="474" y="62" width="408" height="36" rx="8" fill="#f5f0fc"/>
+      <text x="678" y="85" text-anchor="middle" font-size="14.5" font-weight="700" fill="#3a1a5c">${chStr} · ${famNames[fam]}</text>
+
+      ${state.u1Simp && fam !== "jfet" ? `
+        <text x="580" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1a5c">高職課本標準四腳符號</text>
+        ${drawSymbolSVG(580, 225, 1.32, fam, nChan, state.u1Xray, false)}
+        <text x="580" y="324" text-anchor="middle" font-size="12" font-weight="700" fill="#1d6fa5">中間 B 箭頭：${nChan ? '朝內 ◀ (P→N)' : '朝外 ▶ (P→N)'}</text>
+
+        <text x="780" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#b91c1c">IC 簡化三腳符號 (省去B)</text>
+        ${drawSymbolSVG(780, 225, 1.32, fam, nChan, false, true)}
+        <text x="780" y="324" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">${nChan ? '源極 S 箭頭朝外 ▶ (電流流出)' : '源極箭頭朝內 ◀ (電流流入)'}</text>
+      ` : `
+        ${drawSymbolSVG(678, 222, 1.62, fam, nChan, state.u1Xray, false)}
+      `}
+
+      <!-- 3-Step Callout Cards -->
+      <rect x="474" y="350" width="408" height="166" rx="10" fill="#faf7fe" stroke="#e0d0f0" stroke-width="1.6"/>
+      <text x="490" y="378" font-size="13.5" font-weight="700" fill="#1e293b">${gateNote}</text>
+      <text x="490" y="408" font-size="13.5" font-weight="700" fill="${fam === 'emos' ? '#c2410c' : '#0f766e'}">${chanNote}</text>
+      <text x="490" y="438" font-size="13.5" font-weight="700" fill="${nChan ? '#1d6fa5' : '#c96a1b'}">${arrNote}</text>
+      <rect x="488" y="454" width="380" height="48" rx="7" fill="#fff4db" stroke="#e4be6e"/>
+      <text x="678" y="475" text-anchor="middle" font-size="12.5" font-weight="700" fill="#6e4b0c">★ 口訣：箭頭在中間看 PN（N內P外），箭頭在源極看電流！</text>
+      <text x="678" y="494" text-anchor="middle" font-size="12" fill="#785616">${state.showValues ? (fam === 'emos' ? (nChan ? '導通條件：VGS ≧ VT (例 +2V)，VGS=0V 時 ID=0' : '導通條件：VGS ≦ VT (例 -2V)，VGS=0V 時 ID=0') : (nChan ? '控制範圍：VP (-4V) ≦ VGS ≦ 0V (D-MOS 可正偏增強)' : '控制範圍：0V ≦ VGS ≦ VP (+4V) (D-MOS 可負偏增強)')) : '按右上角「⚡ 顯示電氣數值 (V)」可查看導通偏壓條件'}</text>
+
+      <g id="dynAnimLayer"></g>
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 2: JFET Squeeze Pipe & Reverse-Bias Law
+  // =========================================================
+  function renderUnit2() {
+    const nChan = state.u2NChan;
+    const vp = nChan ? -4.0 : 4.0;
+    const idss = 8.0;
+    const vgs = state.u2Vgs; // N-ch: -4.5..+0.8; P-ch: -0.8..+4.5
+
+    const isFwdLeak = nChan ? (vgs > 0.45) : (vgs < -0.45);
+    const ratio = Math.max(0, Math.min(1, vgs / vp)); // 0 at VGS=0, 1 at VGS=VP
+    const isCutoff = ratio >= 1.0;
+    let id = 0;
+    if (isFwdLeak) {
+      id = idss * Math.pow(1 + Math.abs(vgs) / 4.0, 1.3);
+    } else if (!isCutoff) {
+      id = idss * Math.pow(1 - ratio, 2);
+    }
+    const gm0 = (2 * idss) / Math.abs(vp);
+    const gm = (!isCutoff && !isFwdLeak) ? gm0 * (1 - ratio) : 0;
+
+    if (isFwdLeak) {
+      setBanner("err", `🚨 嚴重警告：<strong>VGS = ${vgs > 0 ? '+' : ''}${vgs.toFixed(1)} V</strong> 使閘極 PN 接面<strong>順向偏壓導通</strong>！產生巨大閘極漏電流 IG，喪失高輸入阻抗甚至燒毀元件！`);
+      setPill("fault", "🚨 閘極 PN 順偏漏電危險！");
+    } else if (isCutoff) {
+      setBanner("warn", `⛔ <strong>截止區（Cutoff）</strong>：VGS (${vgs.toFixed(1)}V) 達夾止電壓 VP (${vp.toFixed(1)}V)，兩側空乏區<strong>完全貼合封死通道</strong>，ID = <strong>0.00 mA</strong>！`);
+      setPill("warn", "⛔ 空乏區貼合 · 通道截止 ID = 0");
+    } else {
+      setBanner("ok", `正常逆偏控制：<strong>VGS = ${vgs >= 0 ? '+' : ''}${vgs.toFixed(1)} V</strong> ｜ 肖克利電流 <strong>ID = ${id.toFixed(2)} mA</strong>（為 IDSS 的 ${Math.round((id/idss)*100)}%）｜ 閘極電流 <strong>IG ≈ 0 mA</strong>`);
+      setPill("ok", `● 常開通道導通中 · ID = ${id.toFixed(2)} mA`);
+    }
+
+    const depW = isFwdLeak ? 10 : Math.round(18 + 102 * ratio); // max half-channel = 120px
+    const chLeft = 140, chRight = 380, chMid = 260;
+
+    // Build Transfer Curve SVG Path on Right (x: 500..870, y: 95..415)
+    const ox = nChan ? 805 : 555;
+    const oy = 405;
+    const scaleX = 58; // px per V
+    const scaleY = 34; // px per mA
+    let curvePts = [];
+    for (let i = 0; i <= 40; i++) {
+      const vv = (vp * i) / 40;
+      const ii = idss * Math.pow(1 - vv / vp, 2);
+      curvePts.push(`${(ox + vv * scaleX).toFixed(1)},${(oy - ii * scaleY).toFixed(1)}`);
+    }
+    const qVgsClamp = isFwdLeak ? 0 : (isCutoff ? vp : vgs);
+    const qx = ox + qVgsClamp * scaleX;
+    const qy = oy - (isFwdLeak ? idss : id) * scaleY;
+
+    return `<svg viewBox="0 0 920 550" aria-label="JFET內部空乏區擠壓動畫">
+      ${svgDefs()}
+      <!-- Left Physical Cross-Section -->
+      <rect x="18" y="16" width="444" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="240" y="45" text-anchor="middle" font-size="16.5" font-weight="700" fill="#3a1a5c">${nChan ? 'N 通道 JFET（多數載子：藍色自由電子 e⁻）' : 'P 通道 JFET（多數載子：橘色電洞 h⁺）'}</text>
+
+      <!-- Top Drain Terminal -->
+      <rect x="190" y="64" width="140" height="32" rx="6" fill="#334155"/>
+      <text x="260" y="85" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">汲極 Drain (D) ${nChan ? '+VDD' : '-VDD'}</text>
+
+      <!-- Semiconductor Channel Pipe -->
+      <rect x="${chLeft}" y="96" width="240" height="364" fill="${nChan ? '#dbeafe' : '#ffedd5'}" stroke="${nChan ? '#2563eb' : '#ea580c'}" stroke-width="2.6"/>
+
+      <!-- Left & Right Depletion Regions -->
+      <rect x="${chLeft}" y="126" width="${depW}" height="304" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="1.6" opacity="0.92"/>
+      <rect x="${chRight - depW}" y="126" width="${depW}" height="304" rx="8" fill="#fde68a" stroke="#d97706" stroke-width="1.6" opacity="0.92"/>
+
+      <!-- Gate P+ / N+ Blocks -->
+      <rect x="92" y="156" width="54" height="244" rx="6" fill="${nChan ? '#fca5a5' : '#93c5fd'}" stroke="${nChan ? '#b91c1c' : '#1d4ed8'}" stroke-width="2.4"/>
+      <text x="119" y="275" text-anchor="middle" font-size="14" font-weight="700" fill="${nChan ? '#7f1d1d' : '#1e3a8a'}">閘極 G</text>
+      <text x="119" y="295" text-anchor="middle" font-size="13" font-weight="700" fill="${nChan ? '#7f1d1d' : '#1e3a8a'}">(${nChan ? 'P+' : 'N+'})</text>
+
+      <rect x="374" y="156" width="54" height="244" rx="6" fill="${nChan ? '#fca5a5' : '#93c5fd'}" stroke="${nChan ? '#b91c1c' : '#1d4ed8'}" stroke-width="2.4"/>
+      <text x="401" y="275" text-anchor="middle" font-size="14" font-weight="700" fill="${nChan ? '#7f1d1d' : '#1e3a8a'}">閘極 G</text>
+      <text x="401" y="295" text-anchor="middle" font-size="13" font-weight="700" fill="${nChan ? '#7f1d1d' : '#1e3a8a'}">(${nChan ? 'N+' : 'P+'})</text>
+      <!-- Fix right gate label to match left gate type! -->
+      <rect x="374" y="280" width="54" height="22" fill="${nChan ? '#fca5a5' : '#93c5fd'}"/>
+      <text x="401" y="296" text-anchor="middle" font-size="13" font-weight="700" fill="${nChan ? '#7f1d1d' : '#1e3a8a'}">(${nChan ? 'P+' : 'N+'})</text>
+
+      <!-- Gate Bias Tag -->
+      <line x1="42" y1="278" x2="92" y2="278" stroke="#334155" stroke-width="2.8"/>
+      <rect x="26" y="232" width="64" height="36" rx="6" fill="${isFwdLeak ? '#fee2e2' : '#f1f5f9'}" stroke="${isFwdLeak ? '#dc2626' : '#64748b'}"/>
+      <text x="58" y="255" text-anchor="middle" font-size="12.5" font-weight="700" fill="${isFwdLeak ? '#b91c1c' : '#1e293b'}">${vgs >= 0 ? '+' : ''}${vgs.toFixed(1)}V</text>
+
+      <!-- Dynamic Particle Layer -->
+      <g id="dynAnimLayer" data-unit="u2" data-id="${id.toFixed(3)}" data-dep="${depW}" data-nchan="${nChan ? 1 : 0}" data-leak="${isFwdLeak ? 1 : 0}"></g>
+
+      ${isCutoff ? `<rect x="166" y="255" width="188" height="44" rx="8" fill="#991b1b" opacity="0.92"/>
+        <text x="260" y="282" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">⛔ 空乏區貼合封死 (ID=0)</text>` : ''}
+
+      ${isFwdLeak ? `<rect x="135" y="242" width="250" height="62" rx="8" fill="#b91c1c" opacity="0.95"/>
+        <text x="260" y="268" text-anchor="middle" font-size="14" font-weight="700" fill="#fde047">🚨 警告：PN 順向偏壓漏電！</text>
+        <text x="260" y="291" text-anchor="middle" font-size="12" fill="#fff">JFET 絕不可工作於順偏區！</text>` : ''}
+
+      <!-- Bottom Source Terminal -->
+      <rect x="170" y="460" width="180" height="32" rx="6" fill="#334155"/>
+      <text x="260" y="481" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">源極 Source (S = 0V 載子源頭)</text>
+      <text x="260" y="516" text-anchor="middle" font-size="12" fill="#475569">有效通道寬度：<tspan font-weight="700" fill="#3a1a5c">${Math.max(0, Math.round((1 - ratio)*100))}%</tspan> ｜ 暖黃色：無載子空乏區</text>
+
+      <!-- Right Transfer Curve Card -->
+      <rect x="478" y="16" width="424" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="690" y="45" text-anchor="middle" font-size="16.5" font-weight="700" fill="#3a1a5c">肖克利轉移特性曲線 ID − VGS</text>
+      <text x="690" y="72" text-anchor="middle" font-size="13.5" font-weight="700" fill="#0f766e">ID = IDSS × (1 − VGS / VP)²</text>
+
+      <!-- Grid & Axes -->
+      <line x1="518" y1="${oy}" x2="862" y2="${oy}" stroke="#334155" stroke-width="2.4"/>
+      <line x1="${ox}" y1="${oy + 8}" x2="${ox}" y2="102" stroke="#334155" stroke-width="2.4"/>
+      <text x="${ox}" y="92" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">ID (mA)</text>
+      <text x="${nChan ? 522 : 856}" y="${oy - 10}" text-anchor="${nChan ? 'start' : 'end'}" font-size="12.5" font-weight="700" fill="#1e293b">VGS (V)</text>
+
+      <!-- Reference dashed lines (0.5 VP -> 0.25 IDSS, IDSS) -->
+      <line x1="${ox + 0.5 * vp * scaleX}" y1="${oy}" x2="${ox + 0.5 * vp * scaleX}" y2="${oy - 2 * scaleY}" stroke="#94a3b8" stroke-dasharray="4 3"/>
+      <line x1="${ox}" y1="${oy - 2 * scaleY}" x2="${ox + 0.5 * vp * scaleX}" y2="${oy - 2 * scaleY}" stroke="#94a3b8" stroke-dasharray="4 3"/>
+      <text x="${ox + (nChan ? 8 : -8)}" y="${oy - 8 * scaleY + 4}" text-anchor="${nChan ? 'start' : 'end'}" font-size="12" font-weight="700" fill="#1d4ed8">IDSS=8mA</text>
+      <text x="${ox + vp * scaleX}" y="${oy + 22}" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">VP=${vp}V</text>
+      <text x="${ox + 0.5 * vp * scaleX}" y="${oy + 22}" text-anchor="middle" font-size="11.5" fill="#64748b">${0.5 * vp}V</text>
+      <text x="${ox}" y="${oy + 22}" text-anchor="middle" font-size="12" font-weight="700" fill="#1e293b">0V</text>
+
+      <!-- Shockley Parabola -->
+      <polyline points="${curvePts.join(' ')}" fill="none" stroke="#1d6fa5" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- Q-point -->
+      <line x1="${qx}" y1="${oy}" x2="${qx}" y2="${qy}" stroke="#dc2626" stroke-dasharray="4 3" stroke-width="1.6"/>
+      <line x1="${ox}" y1="${qy}" x2="${qx}" y2="${qy}" stroke="#dc2626" stroke-dasharray="4 3" stroke-width="1.6"/>
+      <circle cx="${qx}" cy="${qy}" r="8.5" fill="#dc2626" stroke="#fff" stroke-width="2.5"/>
+
+      <!-- Formula Live Substitution Box -->
+      <rect x="502" y="444" width="376" height="74" rx="10" fill="#faf7fe" stroke="#e0d0f0" stroke-width="1.6"/>
+      <text x="690" y="469" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3a1a5c">
+        ${isCutoff ? '截止模型：ID ≈ 0 mA（不延用平方公式）' : isFwdLeak ? '接面順偏：不適用正常轉移公式' : `ID = 8 × (1 − (${vgs.toFixed(1)}) / (${vp.toFixed(1)}))² = ${id.toFixed(2)} mA`}
+      </text>
+      <text x="690" y="497" text-anchor="middle" font-size="12.5" fill="#475569">
+        ${state.showValues ? `互導靈敏度 gm = ${gm.toFixed(2)} mA/V (最大 gm0 = ${gm0.toFixed(1)} mA/V)` : '速算口訣：VGS = 0.5 VP 時 ID = 1/4 IDSS；VGS = 0.3 VP 時 ID ≒ 1/2 IDSS'}
+      </text>
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 3: Wedge Depletion & Pinch-Off Waterfall Mystery
+  // =========================================================
+  function renderUnit3() {
+    const vp = -4.0, idss = 8.0;
+    const vgs = state.u3Vgs; // -4.0 .. 0.0
+    const vds = state.u3Vds; // 0.0 .. 10.0
+    const vdsSat = Math.max(0, vgs - vp); // VGS - VP
+    const isCutoff = vgs <= vp + 0.01;
+    const isPinched = !isCutoff && vds >= vdsSat && vdsSat > 0;
+
+    let id = 0;
+    if (!isCutoff) {
+      const idSat = idss * Math.pow(1 - vgs / vp, 2);
+      if (vds < vdsSat) {
+        const u = vds / vdsSat;
+        id = idSat * (2 * u - u * u);
+      } else {
+        id = idSat;
+      }
+    }
+
+    if (isCutoff) {
+      setBanner("err", `⛔ <strong>截止區（整條通道封死）</strong>：因為 VGS = ${vgs.toFixed(1)}V ≦ VP (-4V)，從源極入口到汲極出口全被捏死，<strong>ID = 0.00 mA</strong>！`);
+      setPill("fault", "⛔ 截止區 · 入口封死 ID = 0");
+    } else if (isPinched) {
+      setBanner("ok", `🌊 <strong>飽和區／夾止定電流區</strong>（VDS=${vds.toFixed(1)}V ≧ VDS(sat)=${vdsSat.toFixed(1)}V）：上方窄口形成<strong>強電場瀑布</strong>高速掃入電子，<strong>ID = ${id.toFixed(2)} mA 穩定不變</strong>！（放大器工作區）`);
+      setPill("ok", `🌊 夾止瀑布定電流 · ID = ${id.toFixed(2)} mA`);
+    } else {
+      setBanner("warn", `💡 <strong>歐姆區／可變電阻區</strong>（VDS=${vds.toFixed(1)}V &lt; VDS(sat)=${vdsSat.toFixed(1)}V）：通道尚未夾止，<strong>ID = ${id.toFixed(2)} mA</strong>（FET 當<strong>電子開關 ON</strong> 的低壓降區！）`);
+      setPill("warn", `💡 歐姆區 (開關導通區) · ID = ${id.toFixed(2)} mA`);
+    }
+
+    // Wedge depletion widths at bottom (S=0V) vs top (D=+VDS)
+    const botPot = 0.0;
+    const midPot = +(vds * 0.5).toFixed(1);
+    const topPot = +vds.toFixed(1);
+    const revBot = Math.min(4.0, Math.max(0, botPot - vgs));
+    const revTop = Math.min(4.0, Math.max(0, topPot - vgs));
+    const wBot = isCutoff ? 116 : Math.round(16 + 98 * (revBot / 4.0));
+    const wTop = isCutoff ? 116 : Math.round(16 + 97 * Math.min(0.97, revTop / 4.0));
+
+    // Right Output Curves Family (VGS = 0, -1, -2, -3, -4V)
+    const ox = 525, oy = 408, sV = 33.5, sI = 33;
+    let familyPaths = "";
+    [0, -1, -2, -3, -4].forEach(vg => {
+      const vsat = Math.max(0, vg - vp);
+      const isat = idss * Math.pow(1 - vg / vp, 2);
+      let pts = [];
+      for (let vd = 0; vd <= 10.01; vd += 0.25) {
+        let ii = 0;
+        if (vsat > 0) {
+          ii = vd < vsat ? isat * (2 * (vd / vsat) - Math.pow(vd / vsat, 2)) : isat;
+        }
+        pts.push(`${(ox + vd * sV).toFixed(1)},${(oy - ii * sI).toFixed(1)}`);
+      }
+      const active = Math.abs(vg - vgs) < 0.08;
+      familyPaths += `<polyline points="${pts.join(' ')}" fill="none" stroke="${active ? '#1d6fa5' : '#cbd5e1'}" stroke-width="${active ? 3.8 : 2}"/>
+        <text x="${ox + 10.15 * sV}" y="${oy - isat * sI + 4}" font-size="11" font-weight="${active ? '700' : '500'}" fill="${active ? '#1d4ed8' : '#64748b'}">${vg}V</text>`;
+    });
+    // Always draw active VGS curve in bright blue even for half-volt steps (e.g. -0.5V, -1.5V)!
+    if (!isCutoff && [0, -1, -2, -3, -4].every(vg => Math.abs(vg - vgs) >= 0.08)) {
+      const isatAct = idss * Math.pow(1 - vgs / vp, 2);
+      let actPts = [];
+      for (let vd = 0; vd <= 10.01; vd += 0.25) {
+        const ii = vd < vdsSat ? isatAct * (2 * (vd / vdsSat) - Math.pow(vd / vdsSat, 2)) : isatAct;
+        actPts.push(`${(ox + vd * sV).toFixed(1)},${(oy - ii * sI).toFixed(1)}`);
+      }
+      familyPaths += `<polyline points="${actPts.join(' ')}" fill="none" stroke="#1d6fa5" stroke-width="3.8"/>`;
+    }
+
+    // Dashed VDS(sat) locus parabola: ID = IDSS * (VDS / |VP|)^2
+    let locusPts = [];
+    for (let vd = 0; vd <= 4.05; vd += 0.2) {
+      const ii = idss * Math.pow(vd / 4.0, 2);
+      locusPts.push(`${(ox + vd * sV).toFixed(1)},${(oy - ii * sI).toFixed(1)}`);
+    }
+    const qx = ox + vds * sV;
+    const qy = oy - id * sI;
+
+    return `<svg viewBox="0 0 920 550" aria-label="夾止瀑布機制與輸出特性曲線">
+      ${svgDefs()}
+      <!-- Left Card: Wedge Depletion & Waterfall -->
+      <rect x="18" y="16" width="448" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="242" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">楔形空乏區 ＆「夾止瀑布」載子加速透視</text>
+
+      <rect x="175" y="64" width="134" height="30" rx="6" fill="#334155"/>
+      <text x="242" y="84" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">汲極 D (+${vds.toFixed(1)}V)</text>
+
+      <!-- Channel Pipe -->
+      <rect x="126" y="94" width="232" height="364" fill="#dbeafe" stroke="#2563eb" stroke-width="2.5"/>
+
+      <!-- Wedge Depletion Polygons (thick at top near +VDS, thin at bottom near 0V!) -->
+      <polygon points="126,118 ${126 + wTop},130 ${126 + wBot},426 126,436" fill="#fde68a" stroke="#d97706" stroke-width="1.8"/>
+      <polygon points="358,118 ${358 - wTop},130 ${358 - wBot},426 358,436" fill="#fde68a" stroke="#d97706" stroke-width="1.8"/>
+
+      <!-- Gate Blocks -->
+      <rect x="82" y="158" width="48" height="236" rx="6" fill="#fca5a5" stroke="#b91c1c" stroke-width="2.2"/>
+      <text x="106" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7f1d1d">G<tspan x="106" dy="16">${vgs.toFixed(1)}V</tspan></text>
+      <rect x="354" y="158" width="48" height="236" rx="6" fill="#fca5a5" stroke="#b91c1c" stroke-width="2.2"/>
+      <text x="378" y="275" text-anchor="middle" font-size="12.5" font-weight="700" fill="#7f1d1d">G<tspan x="378" dy="16">${vgs.toFixed(1)}V</tspan></text>
+
+      <!-- Golden High-Field Waterfall Sweep Zone when Pinched Off! -->
+      ${isPinched ? `
+        <rect x="224" y="98" width="36" height="68" rx="10" fill="url(#waterfallGrad)" stroke="#f59e0b" stroke-width="2"/>
+        <line x1="242" y1="162" x2="242" y2="104" stroke="#dc2626" stroke-width="3.2" marker-end="url(#arrRed)"/>
+        <rect x="28" y="102" width="142" height="44" rx="7" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.8"/>
+        <text x="99" y="121" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b45309">⚡ 夾止強電場瀑布</text>
+        <text x="99" y="138" text-anchor="middle" font-size="11" fill="#92400e">電子瞬間高速吸進 D！</text>
+      ` : ''}
+
+      <!-- 3 Live Channel Voltage Probes (Requested by Student Reviewer!) -->
+      <g font-size="11" font-weight="700">
+        <line x1="358" y1="134" x2="408" y2="134" stroke="#b45309" stroke-dasharray="3 2"/>
+        <rect x="404" y="118" width="56" height="32" rx="5" fill="#fef3c7" stroke="#d97706"/>
+        <text x="432" y="132" text-anchor="middle" fill="#92400e">上:${topPot}V</text>
+        <text x="432" y="145" text-anchor="middle" font-size="9.5" fill="#b45309">逆偏${(topPot-vgs).toFixed(1)}V</text>
+
+        <line x1="358" y1="276" x2="408" y2="276" stroke="#0f766e" stroke-dasharray="3 2"/>
+        <rect x="408" y="260" width="52" height="32" rx="5" fill="#ecfdf5" stroke="#10b981"/>
+        <text x="434" y="274" text-anchor="middle" fill="#065f46">中:${midPot}V</text>
+        <text x="434" y="287" text-anchor="middle" font-size="9.5" fill="#047857">逆偏${(midPot-vgs).toFixed(1)}V</text>
+
+        <line x1="358" y1="422" x2="408" y2="422" stroke="#1d4ed8" stroke-dasharray="3 2"/>
+        <rect x="404" y="406" width="56" height="32" rx="5" fill="#eff6ff" stroke="#3b82f6"/>
+        <text x="432" y="420" text-anchor="middle" fill="#1e40af">下:0.0V</text>
+        <text x="432" y="433" text-anchor="middle" font-size="9.5" fill="#1d4ed8">逆偏${(0-vgs).toFixed(1)}V</text>
+      </g>
+
+      <!-- Dynamic Electrons Layer -->
+      <g id="dynAnimLayer" data-unit="u3" data-id="${id.toFixed(3)}" data-pinch="${isPinched ? 1 : 0}" data-wbot="${wBot}" data-wtop="${wTop}" data-vds="${vds}"></g>
+
+      <rect x="166" y="458" width="152" height="30" rx="6" fill="#334155"/>
+      <text x="242" y="478" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">源極 S (0.0V 接地)</text>
+      <text x="242" y="514" text-anchor="middle" font-size="12" fill="#475569">觀察：上方電位高 → 逆偏壓大 → 空乏區呈<tspan font-weight="700" fill="#b45309">上厚下薄楔形</tspan></text>
+
+      <!-- Right Card: Output Characteristic Family -->
+      <rect x="480" y="16" width="422" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="691" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">輸出特性曲線族 ID − VDS</text>
+
+      <!-- Shaded Region Labels -->
+      <rect x="528" y="64" width="132" height="36" rx="7" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="594" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#1d4ed8">← 歐姆區 (壓控電阻)</text>
+      <text x="594" y="95" text-anchor="middle" font-size="11" fill="#1e40af">★ FET 電子開關導通區</text>
+
+      <rect x="672" y="64" width="208" height="36" rx="7" fill="#ecfdf5" stroke="#86efac"/>
+      <text x="776" y="80" text-anchor="middle" font-size="12" font-weight="700" fill="#15803d">飽和區 / 夾止區 →</text>
+      <text x="776" y="95" text-anchor="middle" font-size="11" fill="#166534">★ 定電流線性放大器工作區</text>
+
+      <!-- Axes -->
+      <line x1="${ox}" y1="${oy}" x2="872" y2="${oy}" stroke="#334155" stroke-width="2.4"/>
+      <line x1="${ox}" y1="${oy}" x2="${ox}" y2="116" stroke="#334155" stroke-width="2.4"/>
+      <text x="${ox}" y="110" text-anchor="middle" font-size="12.5" font-weight="700">ID(mA)</text>
+      <text x="884" y="${oy + 16}" text-anchor="end" font-size="12" font-weight="700">VDS(V)</text>
+      ${[0,2,4,6,8,10].map(v => `<text x="${ox + v*sV}" y="${oy + 19}" text-anchor="middle" font-size="11.5" fill="#475569">${v}</text>`).join("")}
+
+      <!-- Locus Parabola & Family Curves -->
+      <polyline points="${locusPts.join(' ')}" fill="none" stroke="#d97706" stroke-width="2.4" stroke-dasharray="6 4"/>
+      <text x="${ox + 4.1*sV}" y="${oy - 8*sI - 6}" font-size="11" font-weight="700" fill="#b45309">夾止邊界 VDS(sat)=VGS−VP</text>
+      ${familyPaths}
+
+      <!-- Current Q Point -->
+      <circle cx="${qx}" cy="${qy}" r="8.5" fill="#dc2626" stroke="#fff" stroke-width="2.5"/>
+
+      <!-- BJT vs FET Warning Box -->
+      <rect x="500" y="442" width="382" height="76" rx="9" fill="#fff4db" stroke="#e3b85c" stroke-width="1.6"/>
+      <text x="691" y="465" text-anchor="middle" font-size="13" font-weight="700" fill="#92400e">⚠️ 必考警報：FET 的「飽和區」跟 BJT 剛好相反！</text>
+      <text x="691" y="486" text-anchor="middle" font-size="12" fill="#594318">目前夾止點 VDS(sat) = ${vgs.toFixed(1)} − (-4.0) = <tspan font-weight="700">${vdsSat.toFixed(1)} V</tspan></text>
+      <text x="691" y="505" text-anchor="middle" font-size="12" fill="#594318">當 VDS ≧ ${vdsSat.toFixed(1)}V 即進入定電流飽和區，ID = ${id.toFixed(2)} mA</text>
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 4: D-MOSFET Dual-Mode (Depletion + Enhancement)
+  // =========================================================
+  function renderUnit4() {
+    const vp = -4.0, idss = 6.0;
+    const vgs = state.u4Vgs; // -4.5 .. +2.5
+    const isCutoff = vgs <= vp;
+    const id = isCutoff ? 0 : idss * Math.pow(1 - vgs / vp, 2);
+    const modeStr = isCutoff ? "截止區 (通道清空)" : (vgs < -0.05 ? "空乏模式 (負電場排斥電子，通道變瘦)" : (vgs > 0.05 ? "增強模式 (正電場吸引電子，ID 突破 IDSS！)" : "零偏壓基準 (ID = IDSS = 6.0 mA)"));
+
+    setBanner(isCutoff ? "warn" : "ok", `D-MOSFET 隔著 <strong>SiO₂ 玻璃</strong>控制：<strong>VGS = ${vgs >= 0 ? '+' : ''}${vgs.toFixed(1)} V</strong> ｜ <strong>${modeStr}</strong> ｜ <strong>ID = ${id.toFixed(2)} mA</strong>（IG ≈ 0）`);
+    setPill(isCutoff ? "warn" : "ok", vgs > 0.05 ? `🚀 增強模式 ID=${id.toFixed(2)}mA (>IDSS)` : `● ${vgs < -0.05 ? '空乏模式' : '零偏壓'} ID=${id.toFixed(2)}mA`);
+
+    const chThick = isCutoff ? 0 : Math.max(5, Math.min(82, Math.round(36 * (1 - vgs / vp))));
+
+    // Right Transfer Curve (-4.5V to +2.5V)
+    const ox = 710, oy = 415, sX = 46, sY = 18;
+    let pts = [];
+    for (let vv = -4.0; vv <= 2.51; vv += 0.15) {
+      const ii = idss * Math.pow(1 - vv / vp, 2);
+      pts.push(`${(ox + vv * sX).toFixed(1)},${(oy - ii * sY).toFixed(1)}`);
+    }
+    const qx = ox + Math.max(-4.3, vgs) * sX;
+    const qy = oy - id * sY;
+
+    return `<svg viewBox="0 0 920 550" aria-label="D-MOSFET橫截面雙向控制動畫">
+      ${svgDefs()}
+      <!-- Left Physical Cross-Section -->
+      <rect x="18" y="16" width="468" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="252" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">N 通道 D-MOSFET 橫截面（天生有實體通道）</text>
+
+      <!-- Gate Electrode & Charges -->
+      <rect x="148" y="106" width="208" height="34" rx="6" fill="#334155"/>
+      <text x="252" y="128" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">金屬閘極 Gate (VGS = ${vgs >= 0 ? '+' : ''}${vgs.toFixed(1)}V)</text>
+
+      <!-- SiO2 Glass Insulator -->
+      <rect x="132" y="140" width="240" height="32" rx="3" fill="url(#sio2Grad)" stroke="#ca8a04" stroke-width="2"/>
+      <text x="252" y="161" text-anchor="middle" font-size="12" font-weight="700" fill="#854d0e">SiO₂ 二氧化矽玻璃絕緣層 (IG ≈ 0 不漏電！)</text>
+
+      <!-- P-Substrate -->
+      <rect x="44" y="172" width="416" height="264" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2.2"/>
+      <text x="252" y="416" text-anchor="middle" font-size="13.5" font-weight="700" fill="#991b1b">P 型矽基底 (P-Substrate，與源極 S 短接接地)</text>
+
+      <!-- Pre-implanted N-Channel (Dynamic Thickness!) -->
+      <rect x="138" y="173" width="228" height="38" fill="#eff6ff" stroke="#93c5fd" stroke-dasharray="4 3"/>
+      ${chThick > 0 ? `<rect x="138" y="173" width="228" height="${chThick}" fill="#bae6fd" stroke="#0284c7" stroke-width="2"/>` : ''}
+
+      <!-- Electric Field Arrows across Glass -->
+      ${Math.abs(vgs) > 0.15 ? [175, 225, 275, 325].map(ex =>
+        vgs > 0
+          ? `<text x="${ex}" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">＋</text>
+             <line x1="${ex}" y1="143" x2="${ex}" y2="195" stroke="#dc2626" stroke-width="2" marker-end="url(#arrRed)"/>`
+          : `<text x="${ex}" y="100" text-anchor="middle" font-size="14" font-weight="700" fill="#1d4ed8">－</text>
+             <line x1="${ex}" y1="176" x2="${ex}" y2="225" stroke="#1d4ed8" stroke-width="2" marker-end="url(#arrBlue)"/>`
+      ).join("") : ''}
+
+      <!-- N+ Source & Drain Regions -->
+      <rect x="64" y="172" width="76" height="122" rx="8" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2.4"/>
+      <text x="102" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">N+ 源極<tspan x="102" dy="18">S (0V)</tspan></text>
+      <rect x="364" y="172" width="76" height="122" rx="8" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2.4"/>
+      <text x="402" y="232" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">N+ 汲極<tspan x="402" dy="18">D (+VDD)</tspan></text>
+
+      <!-- Dynamic Horizontal Electrons -->
+      <g id="dynAnimLayer" data-unit="u4" data-id="${id.toFixed(3)}" data-thick="${chThick}"></g>
+
+      <rect x="44" y="454" width="416" height="62" rx="9" fill="#faf7fe" stroke="#e0d0f0"/>
+      <text x="252" y="478" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1a5c">
+        ${vgs > 0.05 ? '✨ 正偏增強：正電場隔著玻璃吸來更多電子，通道變厚 ID > IDSS！' : (vgs < -0.05 ? '🔻 負偏空乏：負電場隔著玻璃把通道電子往下趕走，通道變瘦！' : '⚖️ VGS = 0V：預先植入的實體 N 通道自然導通 IDSS = 6 mA')}
+      </text>
+      <text x="252" y="501" text-anchor="middle" font-size="12" fill="#475569">比喻：就像隔著玻璃桌面用磁鐵吸／推鐵粉，完全不怕順偏漏電！</text>
+
+      <!-- Right Dual-Quadrant Transfer Curve -->
+      <rect x="502" y="16" width="400" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="702" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">橫跨二、一象限的轉移曲線</text>
+
+      <!-- Quadrant Shading -->
+      <rect x="524" y="105" width="${ox - 524}" height="${oy - 105}" fill="#fff7ed" opacity="0.65"/>
+      <rect x="${ox}" y="105" width="${860 - ox}" height="${oy - 105}" fill="#ecfdf5" opacity="0.65"/>
+      <text x="615" y="128" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c2410c">◀ 空乏模式 (VGS &lt; 0)</text>
+      <text x="785" y="128" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">增強模式 (VGS &gt; 0) ▶</text>
+
+      <!-- Axes -->
+      <line x1="518" y1="${oy}" x2="875" y2="${oy}" stroke="#334155" stroke-width="2.4"/>
+      <line x1="${ox}" y1="${oy + 8}" x2="${ox}" y2="95" stroke="#334155" stroke-width="2.4"/>
+      <text x="${ox}" y="86" text-anchor="middle" font-size="12.5" font-weight="700">ID (mA)</text>
+      <text x="${ox - 4 * sX}" y="${oy + 21}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b91c1c">VP=-4V</text>
+      <text x="${ox}" y="${oy + 21}" text-anchor="middle" font-size="11.5" font-weight="700">0V</text>
+      <text x="${ox + 2 * sX}" y="${oy + 21}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803d">+2V</text>
+      <circle cx="${ox}" cy="${oy - idss * sY}" r="5" fill="#0f766e"/>
+      <text x="${ox - 8}" y="${oy - idss * sY - 6}" text-anchor="end" font-size="11.5" font-weight="700" fill="#0f766e">IDSS=6mA</text>
+
+      <polyline points="${pts.join(' ')}" fill="none" stroke="#15803d" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="${qx}" cy="${qy}" r="8.5" fill="#dc2626" stroke="#fff" stroke-width="2.5"/>
+
+      <rect x="522" y="454" width="360" height="62" rx="9" fill="#faf7fe" stroke="#e0d0f0"/>
+      <text x="702" y="479" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1a5c">共用肖克利公式：ID = 6 × (1 − (${vgs.toFixed(1)})/(-4))²</text>
+      <text x="702" y="502" text-anchor="middle" font-size="13" font-weight="700" fill="#b91c1c">= ${id.toFixed(2)} mA ${state.showValues ? `｜ gm = ${(isCutoff ? 0 : 3*(1 - vgs/(-4))).toFixed(2)} mA/V` : ''}</text>
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 5: E-MOSFET Inversion Layer Bridge & BS170 LED Load
+  // =========================================================
+  function renderUnit5() {
+    const vt = 2.0, kVal = 0.8;
+    const vgs = state.u5Vgs; // 0.0 .. 6.0
+    const isOn = vgs >= vt;
+    const id = isOn ? kVal * Math.pow(vgs - vt, 2) : 0;
+    const ledAlpha = Math.min(1, id / 6.0);
+
+    if (vgs < 0.15) {
+      setBanner("warn", `常閉待機狀態（<strong>VGS = 0.0 V</strong>）：天生無通道，P 基底擋在源極與汲極中間，<strong>ID = 0.00 mA</strong>（完全零耗電，外部 LED 熄滅）`);
+      setPill("warn", "● 常閉斷路 · ID = 0 mA");
+    } else if (!isOn) {
+      setBanner("warn", `排空電洞期（<strong>VGS = +${vgs.toFixed(1)} V &lt; VT = +2.0 V</strong>）：正電場把電洞 h⁺ 往下推開形成空乏層，但電子橋樑尚未連通，<strong>ID = 0.00 mA</strong>`);
+      setPill("warn", `⏳ 尚未達臨界電壓 VT (+2V) · ID = 0`);
+    } else {
+      setBanner("ok", `🎉 <strong>強反轉層造橋成功！</strong>（<strong>VGS = +${vgs.toFixed(1)} V ≧ VT</strong>）：左右 N+ 電子大軍湧入玻璃下方形成 N 型橋樑，<strong>ID = ${id.toFixed(2)} mA</strong> 點亮外部 LED！`);
+      setPill("ok", `★ 反轉層導通 · ID = ${id.toFixed(2)} mA`);
+    }
+
+    const holeShift = Math.min(82, Math.round(vgs * 21));
+    const depH = Math.min(95, Math.round(vgs * 24));
+    const invH = isOn ? Math.min(34, Math.round(10 + (vgs - vt) * 6)) : 0;
+
+    // Right Transfer Curve (0..6V)
+    const ox = 548, oy = 415, sX = 52, sY = 21;
+    let pts = [`${ox},${oy}`, `${ox + vt * sX},${oy}`];
+    for (let vv = vt; vv <= 6.01; vv += 0.15) {
+      const ii = kVal * Math.pow(vv - vt, 2);
+      pts.push(`${(ox + vv * sX).toFixed(1)},${(oy - ii * sY).toFixed(1)}`);
+    }
+    const qx = ox + vgs * sX;
+    const qy = oy - id * sY;
+
+    return `<svg viewBox="0 0 920 550" aria-label="E-MOSFET反轉層造橋與LED開關動畫">
+      ${svgDefs()}
+      <rect x="18" y="16" width="474" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="255" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">N 通道 E-MOSFET「無中生有」造橋 ＋ LED 負載</text>
+
+      <!-- External +5V & Red LED Load connected to Drain D! -->
+      <text x="414" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">+VDD (5V~12V)</text>
+      <line x1="414" y1="73" x2="414" y2="96" stroke="#dc2626" stroke-width="2.6"/>
+      ${isOn ? `<circle cx="414" cy="112" r="${16 + 12 * ledAlpha}" fill="url(#ledGlowRed)"/>` : ''}
+      <polygon points="402,96 426,96 414,120" fill="${isOn ? '#ef4444' : '#cbd5e1'}" stroke="#334155" stroke-width="1.8"/>
+      <line x1="401" y1="121" x2="427" y2="121" stroke="#334155" stroke-width="2.4"/>
+      <line x1="414" y1="121" x2="414" y2="174" stroke="${isOn ? '#dc2626' : '#94a3b8'}" stroke-width="2.6"/>
+      <text x="442" y="113" font-size="11.5" font-weight="700" fill="${isOn ? '#dc2626' : '#64748b'}">${isOn ? 'LED 亮!' : 'LED 滅'}</text>
+
+      <!-- Gate & SiO2 -->
+      <rect x="142" y="108" width="196" height="32" rx="6" fill="#334155"/>
+      <text x="240" y="129" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">閘極 Gate (+${vgs.toFixed(1)}V)</text>
+      <rect x="128" y="140" width="224" height="32" rx="3" fill="url(#sio2Grad)" stroke="#ca8a04" stroke-width="2"/>
+      <text x="240" y="161" text-anchor="middle" font-size="11.5" font-weight="700" fill="#854d0e">SiO₂ 玻璃絕緣層 (IG ≈ 0)</text>
+
+      <!-- P-Substrate -->
+      <rect x="40" y="172" width="424" height="256" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2.2"/>
+      <text x="245" y="408" text-anchor="middle" font-size="13" font-weight="700" fill="#991b1b">P 型矽基底 (原本表面充滿電洞 h⁺，無通道！)</text>
+
+      <!-- Depletion Zone under Gate -->
+      ${depH > 2 ? `<rect x="132" y="173" width="216" height="${depH}" fill="#fef9c3" opacity="0.82"/>` : ''}
+
+      <!-- Induced N-Type Inversion Layer Bridge when VGS >= VT! -->
+      ${isOn ? `
+        <rect x="130" y="173" width="220" height="${invH}" fill="#7dd3fc" stroke="#0284c7" stroke-width="2.5"/>
+        <text x="240" y="${173 + invH + 15}" text-anchor="middle" font-size="10.2" font-weight="700" fill="#0369a1">▲ 感應 N 型反轉層橋樑 (兩側 N+ 電子湧入)</text>
+      ` : ''}
+
+      <!-- Repelled Pink Holes h+ -->
+      ${[156, 198, 240, 282, 324].map(hx => `
+        <circle cx="${hx}" cy="${202 + holeShift}" r="7.5" fill="#fff1f2" stroke="#e11d48" stroke-width="1.8"/>
+        <text x="${hx}" y="${206 + holeShift}" text-anchor="middle" font-size="10" font-weight="700" fill="#be123c">+</text>
+      `).join("")}
+
+      <!-- N+ Source & Drain -->
+      <rect x="56" y="172" width="76" height="118" rx="8" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2.4"/>
+      <text x="94" y="228" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">N+ 源極<tspan x="94" dy="18">S (GND)</tspan></text>
+      <rect x="348" y="172" width="76" height="118" rx="8" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2.4"/>
+      <text x="386" y="228" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">N+ 汲極<tspan x="386" dy="18">D</tspan></text>
+
+      <!-- Dynamic Electrons Layer -->
+      <g id="dynAnimLayer" data-unit="u5" data-id="${id.toFixed(3)}" data-inv="${invH}"></g>
+
+      ${state.u5Pinout ? `
+        <rect x="42" y="302" width="420" height="122" rx="9" fill="#1e293b" opacity="0.96"/>
+        <text x="252" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#fde047">📦 實習課主角 BS170 (TO-92) 腳位與接線防呆</text>
+        <path d="M95,345 L155,345 A32,24 0 0,1 95,345 Z" fill="#475569" stroke="#cbd5e1" stroke-width="2"/>
+        <text x="125" y="340" text-anchor="middle" font-size="10.5" fill="#fff">平面朝自己</text>
+        <text x="98" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#93c5fd">1:D</text>
+        <text x="125" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#fde047">2:G</text>
+        <text x="152" y="388" text-anchor="middle" font-size="12" font-weight="700" fill="#86efac">3:S</text>
+        <text x="182" y="356" font-size="12" fill="#f8fafc">• 平面朝向自己左至右：<tspan font-weight="700" fill="#fde047">D (汲) - G (閘) - S (源)</tspan></text>
+        <text x="182" y="380" font-size="12" fill="#f8fafc">• 閘極 G 對 GND 務必接 <tspan font-weight="700" fill="#86efac">100kΩ~1MΩ 下拉電阻</tspan></text>
+        <text x="182" y="404" font-size="11.5" fill="#fca5a5">  避免閘極浮接（Floating）像天線亂吸雜訊誤亮！</text>
+      ` : `
+        <rect x="40" y="444" width="424" height="72" rx="9" fill="#faf7fe" stroke="#e0d0f0"/>
+        <text x="252" y="468" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1a5c">為什麼叫「反轉層（Inversion Layer）」？</text>
+        <text x="252" y="491" text-anchor="middle" font-size="12" fill="#475569">玻璃正下方原本是 P 型，被強正電場吸滿電子後「反轉成 N 型表面」！</text>
+        <text x="252" y="509" text-anchor="middle" font-size="11.5" fill="#0369a1">（電子來源：左右兩側重摻雜 N+ 源極與汲極支援的電子大軍）</text>
+      `}
+
+      <!-- Right E-MOS Transfer Curve -->
+      <rect x="506" y="16" width="396" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="704" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#3a1a5c">E-MOSFET 轉移特性曲線</text>
+      <text x="704" y="70" text-anchor="middle" font-size="13.5" font-weight="700" fill="#c2410c">ID = K × (VGS − VT)²  (當 VGS ≧ VT)</text>
+
+      <line x1="528" y1="${oy}" x2="876" y2="${oy}" stroke="#334155" stroke-width="2.4"/>
+      <line x1="${ox}" y1="${oy + 8}" x2="${ox}" y2="96" stroke="#334155" stroke-width="2.4"/>
+      <text x="${ox}" y="88" text-anchor="middle" font-size="12.5" font-weight="700">ID(mA)</text>
+      <text x="${ox + vt * sX}" y="${oy + 22}" text-anchor="middle" font-size="12" font-weight="700" fill="#c2410c">VT=+2V</text>
+      <text x="${ox + 4 * sX}" y="${oy + 22}" text-anchor="middle" font-size="11.5" fill="#475569">+4V</text>
+      <text x="${ox + 6 * sX}" y="${oy + 22}" text-anchor="middle" font-size="11.5" fill="#475569">+6V</text>
+
+      <!-- Cutoff region bracket -->
+      <rect x="${ox}" y="${oy - 26}" width="${vt * sX}" height="24" rx="4" fill="#fee2e2" opacity="0.7"/>
+      <text x="${ox + vt * sX * 0.5}" y="${oy - 10}" text-anchor="middle" font-size="11" font-weight="700" fill="#991b1b">截止 ID=0</text>
+
+      <polyline points="${pts.join(' ')}" fill="none" stroke="#c2410c" stroke-width="4.2" stroke-linecap="round"/>
+      <circle cx="${qx}" cy="${qy}" r="8.5" fill="${isOn ? '#16a34a' : '#64748b'}" stroke="#fff" stroke-width="2.5"/>
+
+      <rect x="524" y="448" width="360" height="68" rx="9" fill="#fff7ed" stroke="#fed7aa"/>
+      <text x="704" y="473" text-anchor="middle" font-size="13" font-weight="700" fill="#9a3412">
+        超驅動電壓 VOV = VGS − VT = ${(vgs - vt).toFixed(1)} V
+      </text>
+      <text x="704" y="497" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">
+        ${isOn ? `ID = 0.8 × (${vgs.toFixed(1)} − 2.0)² = ${id.toFixed(2)} mA` : '尚未跨過門檻 VT (+2.0V)，電流 = 0 mA'}
+        ${state.showValues && isOn ? ` ｜ gm = ${(2*kVal*(vgs-vt)).toFixed(2)} mS` : ''}
+      </text>
+    </svg>`;
+  }
+
+
+  // =========================================================
+  // UNIT 6: Synchronized Dual-Curve Lab & 3-Family PK
+  // =========================================================
+  function renderUnit6() {
+    const dev = state.u6Dev; // "jfet" | "dmos" | "emos" | "pk"
+    if (dev === "pk") {
+      setBanner("ok", `📊 <strong>三大家族轉移曲線同框 PK</strong>：在同一個 VGS 座標軸上觀察 <strong>JFET（藍，僅負偏）</strong>、<strong>D-MOS（綠，可負可正）</strong>與 <strong>E-MOS（橘紅，跨過 VT 起飛）</strong>！`);
+      setPill("ok", "📊 三大家族轉移曲線一圖秒殺");
+
+      const ox = 415, oy = 420, sX = 64, sY = 24;
+      const mkPts = (vStart, vEnd, fn) => {
+        let p = [];
+        for (let v = vStart; v <= vEnd + 0.01; v += 0.15) p.push(`${(ox + v * sX).toFixed(1)},${(oy - fn(v) * sY).toFixed(1)}`);
+        return p.join(" ");
+      };
+      const jPts = mkPts(-4, 0, v => 8 * Math.pow(1 - v / (-4), 2));
+      const dPts = mkPts(-4, 2, v => 6 * Math.pow(1 - v / (-4), 2));
+      const ePts = `${ox},${oy} ${ox + 2 * sX},${oy} ` + mkPts(2, 6, v => 0.85 * Math.pow(v - 2, 2));
+
+      return `<svg viewBox="0 0 920 550" aria-label="三大場效電晶體轉移曲線同框PK">
+        ${svgDefs()}
+        <rect x="18" y="16" width="884" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+        <text x="460" y="48" text-anchor="middle" font-size="18" font-weight="700" fill="#3a1a5c">N 通道三大場效電晶體「轉移特性曲線 ID − VGS」同框總對決</text>
+
+        <!-- Quadrant Backgrounds -->
+        <rect x="85" y="80" width="${ox - 85}" height="${oy - 80}" fill="#f8fafc"/>
+        <rect x="${ox}" y="80" width="420" height="${oy - 80}" fill="#fdfcff"/>
+        <line x1="75" y1="${oy}" x2="855" y2="${oy}" stroke="#334155" stroke-width="2.6"/>
+        <line x1="${ox}" y1="${oy + 10}" x2="${ox}" y2="75" stroke="#334155" stroke-width="2.6"/>
+        <text x="${ox}" y="66" text-anchor="middle" font-size="13.5" font-weight="700">ID (mA)</text>
+        <text x="868" y="${oy + 5}" font-size="13" font-weight="700">VGS (V)</text>
+
+        ${[-5,-4,-3,-2,-1,0,1,2,3,4,5,6].map(v => `
+          <line x1="${ox + v*sX}" y1="${oy - 4}" x2="${ox + v*sX}" y2="${oy + 5}" stroke="#475569" stroke-width="1.5"/>
+          <text x="${ox + v*sX}" y="${oy + 22}" text-anchor="middle" font-size="12" fill="#334155" font-weight="${v===-4||v===0||v===2?'700':'400'}">${v > 0 ? '+'+v : v}V</text>
+        `).join("")}
+
+        <!-- 3 Curves -->
+        <polyline points="${jPts}" fill="none" stroke="#1d6fa5" stroke-width="4.5"/>
+        <polyline points="${dPts}" fill="none" stroke="#15803d" stroke-width="4.5" stroke-dasharray="9 4"/>
+        <polyline points="${ePts}" fill="none" stroke="#c2410c" stroke-width="4.5"/>
+
+        <!-- Labels on Curves -->
+        <rect x="115" y="135" width="235" height="64" rx="8" fill="#eff6ff" stroke="#93c5fd"/>
+        <text x="232" y="158" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1d4ed8">① N-JFET (藍實線)</text>
+        <text x="232" y="180" text-anchor="middle" font-size="12" fill="#1e3a8a">僅限負偏壓 VP(-4V) ～ 0V (IDSS=8mA)</text>
+
+        <rect x="442" y="96" width="256" height="64" rx="8" fill="#ecfdf5" stroke="#86efac"/>
+        <text x="570" y="119" text-anchor="middle" font-size="13.5" font-weight="700" fill="#15803d">② N-D-MOS (綠虛線)</text>
+        <text x="570" y="141" text-anchor="middle" font-size="12" fill="#166534">橫跨負(空乏)與正(增強)！共用肖克利公式</text>
+
+        <rect x="598" y="255" width="256" height="64" rx="8" fill="#fff7ed" stroke="#fdba74"/>
+        <text x="726" y="278" text-anchor="middle" font-size="13.5" font-weight="700" fill="#c2410c">③ N-E-MOS (橘紅線)</text>
+        <text x="726" y="300" text-anchor="middle" font-size="12" fill="#9a3412">0V 完全斷路！超過 VT(+2V) 平方暴增</text>
+
+        <rect x="90" y="460" width="740" height="54" rx="9" fill="#fff4db" stroke="#e4be6e"/>
+        <text x="460" y="484" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6e4b0c">★ 考場一眼破題：過原點右方才起飛的是 E-MOS；停在 Y 軸的是 JFET；穿過 Y 軸往右上衝的是 D-MOS！</text>
+        <text x="460" y="504" text-anchor="middle" font-size="12" fill="#785616">（點選下方「N-JFET / N-D-MOS / N-E-MOS」可切換回左右雙曲線雷射對齊實驗！）</text>
+      </svg>`;
+    }
+
+    // Dual-Curve Synchronized Mode
+    let vgs = state.u6Vgs, vds = state.u6Vds;
+    let idSat = 0, vdsSat = 0, id = 0, gm = 0, rdsOn = "∞";
+    const vp = -4.0, vt = 2.0;
+
+    if (dev === "jfet") {
+      vgs = Math.max(-4.0, Math.min(0.0, vgs));
+      vdsSat = Math.max(0, vgs - vp);
+      idSat = 8.0 * Math.pow(1 - vgs / vp, 2);
+      gm = 4.0 * Math.max(0, 1 - vgs / vp);
+    } else if (dev === "dmos") {
+      vgs = Math.max(-4.0, Math.min(1.5, vgs));
+      vdsSat = Math.max(0, vgs - vp);
+      idSat = 6.0 * Math.pow(1 - vgs / vp, 2);
+      gm = 3.0 * Math.max(0, 1 - vgs / vp);
+    } else {
+      vgs = Math.max(0.0, Math.min(6.0, vgs));
+      vdsSat = Math.max(0, vgs - vt);
+      idSat = vgs >= vt ? 0.75 * Math.pow(vgs - vt, 2) : 0;
+      gm = vgs >= vt ? 1.5 * (vgs - vt) : 0;
+    }
+
+    const isCutoff = vdsSat <= 0.01;
+    const isSat = !isCutoff && vds >= vdsSat;
+    if (!isCutoff) {
+      if (vds < vdsSat) {
+        const u = vds / vdsSat;
+        id = idSat * (2 * u - u * u);
+      } else {
+        id = idSat;
+      }
+      rdsOn = (1000 / (2 * (idSat / Math.pow(vdsSat, 2)) * vdsSat)).toFixed(0) + " Ω";
+    }
+
+    const appHint = isCutoff
+      ? "⛔ 截止區（開關 OFF 斷路）"
+      : (isSat ? "🎤 飽和區（定電流，最適合小訊號線性放大器！）" : `💡 歐姆區（低壓降，最適合電子開關 ON，RDS(on) ≒ ${rdsOn}）`);
+    setBanner(isCutoff ? "warn" : "ok", `工作點 Q：<strong>VGS = ${vgs>=0?'+':''}${vgs.toFixed(1)}V, VDS = ${vds.toFixed(1)}V</strong> ｜ <strong>ID = ${id.toFixed(2)} mA</strong> ｜ 互導 <strong>gm = ${gm.toFixed(2)} mS</strong> ｜ ${appHint}`);
+    setPill(isCutoff ? "warn" : "ok", `${appHint.slice(0, 14)} · ID=${id.toFixed(2)}mA`);
+
+    // Left Transfer Plot Coordinates (x: 55..410, y: 100..415)
+    const oy = 412, sY = 23; // up to 13 mA
+    let lOx = dev === "jfet" ? 380 : (dev === "dmos" ? 295 : 95);
+    let lSx = dev === "jfet" ? 68 : (dev === "dmos" ? 50 : 48);
+    let tPts = [];
+    if (dev === "jfet") {
+      for (let v = -4; v <= 0.01; v += 0.1) tPts.push(`${(lOx + v*lSx).toFixed(1)},${(oy - 8*Math.pow(1 - v/(-4),2)*sY).toFixed(1)}`);
+    } else if (dev === "dmos") {
+      for (let v = -4; v <= 1.51; v += 0.1) tPts.push(`${(lOx + v*lSx).toFixed(1)},${(oy - 6*Math.pow(1 - v/(-4),2)*sY).toFixed(1)}`);
+    } else {
+      tPts.push(`${lOx},${oy}`, `${lOx + 2*lSx},${oy}`);
+      for (let v = 2; v <= 6.01; v += 0.1) tPts.push(`${(lOx + v*lSx).toFixed(1)},${(oy - 0.75*Math.pow(v-2,2)*sY).toFixed(1)}`);
+    }
+    const lQx = lOx + vgs * lSx;
+    const lQySat = oy - idSat * sY;
+    const qyActual = oy - id * sY;
+
+    // Right Output Plot Coordinates (x: 495..865, y: 100..412)
+    const rOx = 505, rSx = 34; // 0..10V
+    const vgsSteps = dev === "jfet" ? [0, -1, -2, -3] : (dev === "dmos" ? [1.5, 0.5, 0, -1, -2] : [6, 5, 4, 3]);
+    let outCurves = "";
+    vgsSteps.forEach(vg => {
+      const vs = dev === "emos" ? Math.max(0, vg - vt) : Math.max(0, vg - vp);
+      const is = dev === "jfet" ? 8*Math.pow(1-vg/vp,2) : (dev === "dmos" ? 6*Math.pow(1-vg/vp,2) : 0.75*Math.pow(vg-vt,2));
+      let pts = [];
+      for (let vd = 0; vd <= 10.01; vd += 0.25) {
+        const ii = vd < vs ? is*(2*(vd/vs)-Math.pow(vd/vs,2)) : is;
+        pts.push(`${(rOx + vd*rSx).toFixed(1)},${(oy - ii*sY).toFixed(1)}`);
+      }
+      outCurves += `<polyline points="${pts.join(' ')}" fill="none" stroke="#cbd5e1" stroke-width="1.8"/>
+        <text x="${rOx + 10.1*rSx}" y="${oy - is*sY + 4}" font-size="10.5" fill="#64748b">${vg>0?'+'+vg:vg}V</text>`;
+    });
+    // Active VGS curve on right
+    let actPts = [];
+    for (let vd = 0; vd <= 10.01; vd += 0.2) {
+      const ii = isCutoff ? 0 : (vd < vdsSat ? idSat*(2*(vd/vdsSat)-Math.pow(vd/vdsSat,2)) : idSat);
+      actPts.push(`${(rOx + vd*rSx).toFixed(1)},${(oy - ii*sY).toFixed(1)}`);
+    }
+    // Locus parabola
+    let locPts = [];
+    const kEff = dev === "jfet" ? 0.5 : (dev === "dmos" ? 0.375 : 0.75);
+    for (let vd = 0; vd <= 6.2; vd += 0.2) {
+      const ii = kEff * vd * vd;
+      if (ii <= 13.2) locPts.push(`${(rOx + vd*rSx).toFixed(1)},${(oy - ii*sY).toFixed(1)}`);
+    }
+    const rQx = rOx + vds * rSx;
+
+    // Tangent line for gm on Transfer curve
+    const dxTan = 0.65;
+    const x1Tan = lQx - dxTan * lSx, y1Tan = lQySat + gm * dxTan * sY;
+    const x2Tan = lQx + dxTan * lSx, y2Tan = lQySat - gm * dxTan * sY;
+
+    return `<svg viewBox="0 0 920 550" aria-label="雙曲線雷射對齊實驗室">
+      ${svgDefs()}
+      <!-- Left Card: Transfer Curve -->
+      <rect x="18" y="16" width="424" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="230" y="45" text-anchor="middle" font-size="15.5" font-weight="700" fill="#3a1a5c">左圖：轉移曲線 ID − VGS（含 gm 切線斜率）</text>
+
+      <line x1="55" y1="${oy}" x2="412" y2="${oy}" stroke="#334155" stroke-width="2.3"/>
+      <line x1="${lOx}" y1="${oy + 8}" x2="${lOx}" y2="85" stroke="#334155" stroke-width="2.3"/>
+      <text x="${lOx}" y="76" text-anchor="middle" font-size="12" font-weight="700">ID(mA)</text>
+      <polyline points="${tPts.join(' ')}" fill="none" stroke="#1d6fa5" stroke-width="3.8"/>
+
+      ${!isCutoff ? `
+        <line x1="${x1Tan}" y1="${y1Tan}" x2="${x2Tan}" y2="${y2Tan}" stroke="#ea580c" stroke-width="2.4" stroke-dasharray="5 3"/>
+        <text x="${Math.min(365, Math.max(95, lQx - 45))}" y="${Math.max(105, lQySat - 14)}" font-size="11.5" font-weight="700" fill="#c2410c">切線斜率 gm=${gm.toFixed(2)}mS</text>
+      ` : ''}
+      <circle cx="${lQx}" cy="${lQySat}" r="7.5" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+      <text x="${lQx}" y="${oy + 22}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#15803d">VGS=${vgs.toFixed(1)}V</text>
+
+      <!-- Right Card: Output Curves -->
+      <rect x="458" y="16" width="444" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="680" y="45" text-anchor="middle" font-size="15.5" font-weight="700" fill="#3a1a5c">右圖：輸出特性曲線族 ID − VDS</text>
+
+      <line x1="${rOx}" y1="${oy}" x2="862" y2="${oy}" stroke="#334155" stroke-width="2.3"/>
+      <line x1="${rOx}" y1="${oy + 8}" x2="${rOx}" y2="85" stroke="#334155" stroke-width="2.3"/>
+      <text x="${rOx}" y="76" text-anchor="middle" font-size="12" font-weight="700">ID(mA)</text>
+      ${[0,2,4,6,8,10].map(v => `<text x="${rOx + v*rSx}" y="${oy + 20}" text-anchor="middle" font-size="11" fill="#475569">${v}V</text>`).join("")}
+
+      ${outCurves}
+      <polyline points="${locPts.join(' ')}" fill="none" stroke="#d97706" stroke-width="2.2" stroke-dasharray="5 4"/>
+      <polyline points="${actPts.join(' ')}" fill="none" stroke="#1d6fa5" stroke-width="3.8"/>
+
+      <!-- Horizontal Green Laser Alignment Beam linking Left & Right Plots! -->
+      <line x1="${lQx}" y1="${lQySat}" x2="${rOx + Math.max(vds, vdsSat)*rSx}" y2="${lQySat}" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="6 4"/>
+      <circle cx="${rQx}" cy="${qyActual}" r="8.5" fill="#dc2626" stroke="#fff" stroke-width="2.5"/>
+
+      <!-- Bottom Readout Cards -->
+      <rect x="38" y="450" width="384" height="66" rx="9" fill="#faf7fe" stroke="#e0d0f0"/>
+      <text x="230" y="474" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1a5c">綠虛線雷射對齊：飽和電流 ID(sat) = ${idSat.toFixed(2)} mA</text>
+      <text x="230" y="497" text-anchor="middle" font-size="12" fill="#475569">互導 gm = ΔID / ΔVGS = ${gm.toFixed(2)} mA/V（ID 越大斜率越陡！）</text>
+
+      <rect x="478" y="450" width="404" height="66" rx="9" fill="${isSat ? '#ecfdf5' : '#eff6ff'}" stroke="${isSat ? '#86efac' : '#93c5fd'}"/>
+      <text x="680" y="474" text-anchor="middle" font-size="13" font-weight="700" fill="${isSat ? '#15803d' : '#1d4ed8'}">${appHint}</text>
+      <text x="680" y="497" text-anchor="middle" font-size="12" fill="#334155">夾止邊界 VDS(sat) = ${vdsSat.toFixed(1)}V ｜ 實際輸出 ID = ${id.toFixed(2)} mA</text>
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 7: Advanced Physics (λ) & Naughty Destruction Lab!
+  // =========================================================
+  function renderUnit7() {
+    const tab = state.u7Tab; // "clm" | "bodydiode" | "esd"
+
+    if (tab === "clm") {
+      const lam = state.u7Lambda; // 0.00 .. 0.06
+      const vds = state.u7Vds;    // 0 .. 12V
+      const va = lam > 0.001 ? -(1 / lam).toFixed(1) + " V" : "−∞ (理想水平)";
+      const idBase = 4.0; // at VGS=4V, VT=2V, K=1
+      const vdsSat = 2.0;
+      const idReal = vds < vdsSat ? (2 * 2 * vds - vds * vds) * (1 + lam * vds) : idBase * (1 + lam * vds);
+      const ro = lam > 0.001 ? (1 / (lam * idBase)).toFixed(1) + " kΩ" : "∞ (理想無限大)";
+      const deltaL = vds > vdsSat ? Math.min(72, Math.round((vds - vdsSat) * (180 * lam + 2.2))) : 0;
+
+      setBanner("ok", `🔬 <strong>通道長度調變效應（λ = ${lam.toFixed(2)} V⁻¹）</strong>：VDS=${vds.toFixed(1)}V 使夾止點左退 ΔL，飽和電流微翹至 <strong>ID = ${idReal.toFixed(2)} mA</strong> ｜ 輸出電阻 <strong>ro = ${ro}</strong> ｜ Early 交點 <strong>VA = ${va}</strong>`);
+      setPill("ok", `🔬 有效通道縮短 L' = L − ΔL`);
+
+      const ox = 310, oy = 465, sX = 44, sY = 24;
+      let curves = "";
+      [2, 4, 6].forEach(i0 => {
+        const vs = Math.sqrt(i0);
+        let pts = [];
+        for (let vd = 0; vd <= 12.01; vd += 0.3) {
+          const ii = (vd < vs ? (i0 * (2*(vd/vs) - Math.pow(vd/vs,2))) : i0) * (1 + lam * vd);
+          pts.push(`${(ox + vd*sX).toFixed(1)},${(oy - ii*sY).toFixed(1)}`);
+        }
+        curves += `<polyline points="${pts.join(' ')}" fill="none" stroke="${i0===4?'#1d6fa5':'#94a3b8'}" stroke-width="${i0===4?3.6:2.2}"/>`;
+        if (lam >= 0.015) {
+          const vaX = Math.max(35, ox - (1 / lam) * sX);
+          curves += `<line x1="${vaX}" y1="${oy}" x2="${ox + vs*sX}" y2="${oy - i0*(1+lam*vs)*sY}" stroke="#dc2626" stroke-dasharray="4 4" stroke-width="1.4" opacity="0.75"/>`;
+        }
+      });
+
+      return `<svg viewBox="0 0 920 550" aria-label="通道長度調變效應模擬">
+        ${svgDefs()}
+        <rect x="18" y="16" width="884" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+        <text x="460" y="45" text-anchor="middle" font-size="16.5" font-weight="700" fill="#3a1a5c">進階①：為什麼真實 MOSFET 飽和區曲線會「微微上翹」？（通道長度調變 λ）</text>
+
+        <!-- Top Cross-Section showing ΔL retreat -->
+        <rect x="55" y="64" width="810" height="148" rx="10" fill="#faf7fe" stroke="#e0d0f0"/>
+        <rect x="145" y="102" width="95" height="72" rx="7" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+        <text x="192" y="143" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">N+ 源極 S</text>
+        <rect x="560" y="102" width="95" height="72" rx="7" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+        <text x="607" y="143" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fff">N+ 汲極 D</text>
+
+        <!-- Effective Channel L' vs ΔL Depletion Retreat -->
+        <polygon points="240,104 ${560 - deltaL},104 ${560 - deltaL},112 240,136" fill="#7dd3fc" stroke="#0284c7" stroke-width="1.8"/>
+        ${deltaL > 2 ? `<rect x="${560 - deltaL}" y="102" width="${deltaL}" height="46" fill="#fde68a" stroke="#d97706" stroke-width="2"/>
+          <text x="${560 - deltaL/2}" y="95" text-anchor="middle" font-size="11.5" font-weight="700" fill="#b45309">ΔL 後退區</text>` : ''}
+        <line x1="240" y1="84" x2="${560 - deltaL}" y2="84" stroke="#15803d" stroke-width="2.6" marker-start="url(#arrGreen)" marker-end="url(#arrGreen)"/>
+        <text x="${(240 + 560 - deltaL)/2}" y="78" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">有效通道長度 L' = L − ΔL（隨 VDS 變大而縮短！）</text>
+        <text x="765" y="124" text-anchor="middle" font-size="13" font-weight="700" fill="#1e293b">修正公式：</text>
+        <text x="765" y="148" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1d4ed8">ID = ID(sat)·(1 + λ·VDS)</text>
+        <text x="765" y="172" text-anchor="middle" font-size="12" fill="#b91c1c">輸出電阻 ro = ${ro}</text>
+
+        <!-- Bottom Sloped Output Curves + Early Voltage Convergence -->
+        <line x1="40" y1="${oy}" x2="865" y2="${oy}" stroke="#334155" stroke-width="2.3"/>
+        <line x1="${ox}" y1="${oy + 10}" x2="${ox}" y2="232" stroke="#334155" stroke-width="2.3"/>
+        <text x="${ox + 8}" y="244" font-size="12.5" font-weight="700">ID (mA)</text>
+        <text x="865" y="${oy + 22}" text-anchor="end" font-size="12" font-weight="700">VDS (V)</text>
+        ${curves}
+        <circle cx="${ox + vds*sX}" cy="${oy - idReal*sY}" r="8" fill="#dc2626" stroke="#fff" stroke-width="2.2"/>
+        ${lam >= 0.015 ? `<circle cx="${Math.max(40, ox - (1/lam)*sX)}" cy="${oy}" r="6" fill="#dc2626"/>
+          <text x="${Math.max(95, ox - (1/lam)*sX + 10)}" y="${oy - 12}" font-size="12" font-weight="700" fill="#dc2626">Early 電壓交點 VA = −1/λ = ${va}</text>` :
+          `<text x="165" y="365" text-anchor="middle" font-size="12.5" fill="#64748b">目前 λ = ${lam.toFixed(2)}（調大下方 λ 滑桿觀察曲線微翹與左方 Early 交點！）</text>`}
+      </svg>`;
+    }
+
+    if (tab === "bodydiode") {
+      const pluggedRev = state.u7Reversed;
+      const vgs = state.u7Vgs;
+      const chOn = vgs >= 2.0;
+      const ledOn = pluggedRev || chOn;
+
+      if (pluggedRev) {
+        setBanner("err", `💥 <strong>抓到實習大魔王！你把 D、S 腳插反了！</strong> 內部「寄生體二極體（S→D）」承受<strong>順向偏壓 0.7V 直接導通</strong>——就算把 VGS 關到 0V，LED 也永遠亮著關不掉！`);
+        setPill("fault", "💥 體二極體順偏直通 · 閘極失靈！");
+      } else {
+        setBanner("ok", `✅ <strong>正常腳位接法（D 接高電位、S 接地）</strong>：寄生體二極體呈<strong>逆向偏壓截止隱形</strong>，完全聽命於閘極 VGS（目前 VGS=${vgs.toFixed(1)}V，LED ${ledOn ? '正常點亮' : '乾淨熄滅'}）！`);
+        setPill("ok", `✅ 體二極體逆偏截止 · 開關受控正常`);
+      }
+
+      return `<svg viewBox="0 0 920 550" aria-label="寄生體二極體插反實驗">
+        ${svgDefs()}
+        <rect x="18" y="16" width="884" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+        <text x="460" y="45" text-anchor="middle" font-size="16.5" font-weight="700" fill="#3a1a5c">模擬實驗②：為什麼把三腳 MOSFET (BS170) 的 D、S 腳插反，LED 會永遠關不掉？</text>
+
+        <!-- Cross Section & Internal Body Diode -->
+        <rect x="52" y="88" width="490" height="390" rx="12" fill="#faf7fe" stroke="#e0d0f0" stroke-width="1.8"/>
+        <text x="297" y="116" text-anchor="middle" font-size="15" font-weight="700" fill="#3a1a5c">單體 MOSFET 內部結構真相（P 基底直接與 S 短接！）</text>
+
+        <!-- Metal Tie across S and P+ Body -->
+        <rect x="92" y="170" width="166" height="28" rx="5" fill="#334155"/>
+        <text x="175" y="189" text-anchor="middle" font-size="12" font-weight="700" fill="#fde047">源極 S 金屬跨接 P 基底</text>
+
+        <!-- Gate & SiO2 -->
+        <rect x="272" y="156" width="126" height="24" rx="4" fill="#475569"/>
+        <text x="335" y="173" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff">G (VGS=${vgs.toFixed(1)}V)</text>
+        <rect x="262" y="180" width="146" height="18" fill="url(#sio2Grad)" stroke="#ca8a04"/>
+
+        <!-- P-Body -->
+        <rect x="82" y="198" width="430" height="210" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2.2"/>
+        <rect x="96" y="198" width="70" height="86" fill="#f87171" stroke="#b91c1c" stroke-width="2"/>
+        <text x="131" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">P+ 基底</text>
+        <rect x="166" y="198" width="92" height="86" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+        <text x="212" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">N+ (源極S)</text>
+        <rect x="404" y="198" width="92" height="86" fill="#60a5fa" stroke="#1d4ed8" stroke-width="2"/>
+        <text x="450" y="246" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">N+ (汲極D)</text>
+
+        ${chOn ? `<rect x="258" y="199" width="146" height="20" fill="#7dd3fc" stroke="#0284c7" stroke-width="2"/>` : ''}
+
+        <!-- Big Parasitic Body Diode Symbol Inside P-Body -->
+        <polyline points="175,284 175,346 450,346 450,284" fill="none" stroke="${pluggedRev ? '#dc2626' : '#64748b'}" stroke-width="${pluggedRev ? 4 : 2.5}"/>
+        <polygon points="295,328 295,364 332,346" fill="${pluggedRev ? '#ef4444' : '#cbd5e1'}" stroke="#991b1b" stroke-width="2"/>
+        <line x1="333" y1="326" x2="333" y2="366" stroke="#991b1b" stroke-width="3.2"/>
+        <text x="314" y="388" text-anchor="middle" font-size="13" font-weight="700" fill="${pluggedRev ? '#dc2626' : '#475569'}">
+          寄生體二極體 Body Diode (S → D)：${pluggedRev ? '🔥 順偏 0.7V 狂通中！' : '逆偏截止 (不影響控制)'}
+        </text>
+
+        <!-- Right Circuit Test Bench -->
+        <rect x="564" y="88" width="312" height="390" rx="12" fill="${pluggedRev ? '#fff5f5' : '#faf7fe'}" stroke="${pluggedRev ? '#fca5a5' : '#e0d0f0'}" stroke-width="2"/>
+        <text x="720" y="118" text-anchor="middle" font-size="15" font-weight="700" fill="#1e293b">麵包板 +5V LED 開關測試台</text>
+        <text x="720" y="152" text-anchor="middle" font-size="13" font-weight="700" fill="#b91c1c">+5V 電源 ──▶ 1kΩ ──▶ 紅光 LED</text>
+
+        ${ledOn ? `<circle cx="720" cy="212" r="34" fill="url(#ledGlowRed)"/>` : ''}
+        <circle cx="720" cy="212" r="20" fill="${ledOn ? '#ef4444' : '#cbd5e1'}" stroke="#334155" stroke-width="2.5"/>
+        <text x="720" y="217" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">${ledOn ? '亮 ON' : '滅 OFF'}</text>
+
+        <rect x="576" y="268" width="288" height="106" rx="9" fill="#fff" stroke="#94a3b8" stroke-width="1.8"/>
+        <text x="720" y="295" text-anchor="middle" font-size="12.5" font-weight="700" fill="${pluggedRev ? '#dc2626' : '#15803d'}">
+          ${pluggedRev ? '❌ 插反了！(S 接 LED 高電位、D 接地)' : '✅ 正確接法 (D 接 LED 高電位、S 接地)'}
+        </text>
+        <text x="720" y="322" text-anchor="middle" font-size="12" fill="#334155">閘極電壓 VGS = ${vgs.toFixed(1)} V (${chOn ? '通道導通' : '通道關閉'})</text>
+        <text x="720" y="350" text-anchor="middle" font-size="12" font-weight="700" fill="${pluggedRev ? '#b91c1c' : '#0f766e'}">
+          ${pluggedRev ? '電流走體二極體捷徑，VGS=0V 也關不掉！' : (chOn ? '電流正常經反轉層通道入地！' : '通道與體二極體雙雙截止，完全省電！')}
+        </text>
+
+        <text x="720" y="418" text-anchor="middle" font-size="12" fill="#475569">💡 進階應用：馬達 H 橋驅動器反而利用</text>
+        <text x="720" y="438" text-anchor="middle" font-size="12" fill="#475569">這顆體二極體當作「續流保護二極體」喔！</text>
+        <g id="dynAnimLayer" data-unit="u7_bd" data-on="${ledOn ? 1 : 0}" data-rev="${pluggedRev ? 1 : 0}"></g>
+      </svg>`;
+    }
+
+    // Tab 3: ESD Static Breakdown Lab
+    const blown = state.u7EsdBlown;
+    const zener = state.u7Zener;
+    if (blown) {
+      setBanner("err", `⚡💥 <strong>啪！3000V 毛衣靜電劈穿 SiO₂ 玻璃絕緣層！</strong> 因為 IG ≈ 0 電荷無處宣洩，數奈米玻璃層發生<strong>永久性介電崩潰短路</strong>，這顆 MOSFET 已經報廢了！（請按下方「🔧 更換新 MOSFET」）`);
+      setPill("fault", "💥 SiO₂ 玻璃擊穿報廢！");
+    } else if (zener) {
+      setBanner("ok", `🛡️ <strong>已開啟閘極齊納二極體（Zener）ESD 防護</strong>：即使手指帶 3000V 靜電觸碰，齊納二極體立即在 ±15V 崩潰導通把靜電安全洩放入地，完美保護玻璃層！`);
+      setPill("ok", "🛡️ 齊納保護開啟 · 防靜電安全");
+    } else {
+      setBanner("warn", `⚠️ <strong>無防護裸晶狀態</strong>：MOSFET 的 SiO₂ 玻璃層耐壓僅約 <strong>±20V</strong>，試著點擊下方「⚡ 手指帶 3000V 靜電觸碰閘極」看看後果！`);
+      setPill("warn", "⚠️ 玻璃耐壓僅 ±20V · 小心靜電！");
+    }
+
+    return `<svg viewBox="0 0 920 550" aria-label="MOSFET靜電ESD擊穿實驗">
+      ${svgDefs()}
+      <rect x="18" y="16" width="884" height="518" rx="14" fill="#ffffff" stroke="#e0d0f0" stroke-width="2"/>
+      <text x="460" y="45" text-anchor="middle" font-size="16.5" font-weight="700" fill="#3a1a5c">模擬實驗③：為什麼拿 MOSFET 前要先摸金屬接地放電？（ESD 靜電擊穿）</text>
+
+      <!-- Finger + Spark + Gate Oxide Zoom-in -->
+      <rect x="58" y="82" width="804" height="412" rx="12" fill="${blown ? '#fff1f2' : '#faf7fe'}" stroke="${blown ? '#f43f5e' : '#e0d0f0'}" stroke-width="2"/>
+
+      <!-- Static Finger -->
+      <rect x="92" y="168" width="168" height="58" rx="28" fill="#fed7aa" stroke="#c2410c" stroke-width="2.2"/>
+      <text x="176" y="195" text-anchor="middle" font-size="13.5" font-weight="700" fill="#7c2d12">👉 毛衣靜電手指</text>
+      <text x="176" y="214" text-anchor="middle" font-size="12" font-weight="700" fill="#dc2626">(瞬間高達 3,000 V！)</text>
+      <line x1="260" y1="197" x2="385" y2="197" stroke="#334155" stroke-width="3.2"/>
+
+      <!-- Optional Bidirectional Zener Protection Clamp -->
+      ${zener ? `
+        <rect x="284" y="232" width="90" height="155" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+        <line x1="329" y1="197" x2="329" y2="395" stroke="#059669" stroke-width="2.8"/>
+        <polygon points="315,285 343,285 329,312" fill="#10b981"/>
+        <polyline points="312,318 317,312 341,312 346,306" fill="none" stroke="#065f46" stroke-width="2.6"/>
+        <text x="329" y="255" text-anchor="middle" font-size="11.5" font-weight="700" fill="#065f46">齊納保護</text>
+        <text x="329" y="352" text-anchor="middle" font-size="11" font-weight="700" fill="#047857">鉗位 ±15V</text>
+        <text x="329" y="370" text-anchor="middle" font-size="11" fill="#047857">靜電入地！</text>
+      ` : ''}
+
+      <!-- MOSFET Cross-Section -->
+      <rect x="385" y="176" width="250" height="38" rx="6" fill="#334155"/>
+      <text x="510" y="200" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">金屬閘極 Gate</text>
+
+      <!-- Ultra-thin SiO2 Glass -->
+      <rect x="370" y="214" width="280" height="38" rx="3" fill="${blown ? '#475569' : 'url(#sio2Grad)'}" stroke="${blown ? '#dc2626' : '#ca8a04'}" stroke-width="2.5"/>
+      <text x="510" y="238" text-anchor="middle" font-size="12.5" font-weight="700" fill="${blown ? '#fca5a5' : '#854d0e'}">
+        ${blown ? '💥 玻璃層已被閃電燒穿碳化短路 (IG 狂漏！)' : '超薄 SiO₂ 玻璃層（厚度僅數十奈米 · 耐壓 ±20V）'}
+      </text>
+
+      <rect x="350" y="252" width="320" height="155" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+      <text x="510" y="345" text-anchor="middle" font-size="14" font-weight="700" fill="#991b1b">P 型矽基底 (GND)</text>
+
+      ${blown ? `
+        <polyline points="505,176 492,208 522,226 496,256 518,285" fill="none" stroke="#fde047" stroke-width="6"/>
+        <polyline points="505,176 492,208 522,226 496,256 518,285" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+        <rect x="380" y="422" width="440" height="52" rx="8" fill="#991b1b"/>
+        <text x="600" y="446" text-anchor="middle" font-size="13.5" font-weight="700" fill="#fde047">⚡ 永久損壞！不像 BJT，MOSFET 玻璃一旦打穿無法自我修復！</text>
+        <text x="600" y="466" text-anchor="middle" font-size="12" fill="#fff">請點擊下方「🔧 更換新 MOSFET」並開啟齊納二極體保護再試一次！</text>
+      ` : `
+        <rect x="688" y="176" width="152" height="230" rx="9" fill="#fff" stroke="#e0d0f0"/>
+        <text x="764" y="206" text-anchor="middle" font-size="13.5" font-weight="700" fill="#3a1a5c">實習防靜電守則</text>
+        <text x="764" y="236" text-anchor="middle" font-size="12" fill="#334155">1. 取用前先摸接地金屬</text>
+        <text x="764" y="264" text-anchor="middle" font-size="12" fill="#334155">2. 腳位插導電泡棉保存</text>
+        <text x="764" y="292" text-anchor="middle" font-size="12" fill="#334155">3. CMOS 閒置輸入腳</text>
+        <text x="764" y="314" text-anchor="middle" font-size="12" font-weight="700" fill="#b91c1c">嚴禁懸空浮接！</text>
+        <text x="764" y="340" text-anchor="middle" font-size="11.5" fill="#64748b">（CD4007 多餘腳位</text>
+        <text x="764" y="358" text-anchor="middle" font-size="11.5" fill="#64748b">務必接 VDD 或 GND）</text>
+      `}
+    </svg>`;
+  }
+
+  // =========================================================
+  // UNIT 8: Comparison Table, Student Q&A & 8-Question Quiz
+  // =========================================================
+  function renderUnit8() {
+    const sub = state.u8Sub; // "table" | "qa" | "quiz"
+    if (sub === "table") {
+      const n = state.u8NChan;
+      setBanner("ok", `📋 <strong>三大場效電晶體一頁終極總表</strong>（目前顯示：<strong>${n ? 'N 通道家族' : 'P 通道家族 — 注意正負號全部反轉！'}</strong>）`);
+      setPill("ok", `📋 ${n ? 'N 通道' : 'P 通道'} 考前速查表`);
+
+      return `<div class="stage-scroll">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th>比較項目</th>
+              <th>${n ? 'N' : 'P'} 通道 JFET</th>
+              <th>${n ? 'N' : 'P'} 通道 D-MOSFET</th>
+              <th>${n ? 'N' : 'P'} 通道 E-MOSFET</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><b>閘極絕緣結構</b></td><td>逆偏 PN 接面</td><td>金屬 − SiO₂ 玻璃 − 半導體</td><td>金屬 − SiO₂ 玻璃 − 半導體</td></tr>
+            <tr><td><b>出廠有無通道</b></td><td><span class="tag-green">天生有通道 (常開)</span></td><td><span class="tag-green">天生有通道 (常開)</span></td><td><span class="tag-red">無通道 (常閉省電)</span></td></tr>
+            <tr><td><b>符號特徵</b></td><td>閘極連實線通道，箭頭朝<b>${n ? '內' : '外'}</b></td><td>閘極隔開＋實線，B箭頭朝<b>${n ? '內' : '外'}</b></td><td>閘極隔開＋<b>三段虛線</b>，B箭頭朝<b>${n ? '內' : '外'}</b></td></tr>
+            <tr><td><b>導電多數載子</b></td><td>${n ? '自由電子 e⁻ (S→D)' : '電洞 h⁺ (S→D)'}</td><td>${n ? '自由電子 e⁻ (S→D)' : '電洞 h⁺ (S→D)'}</td><td>${n ? '感應反轉層電子 e⁻' : '感應反轉層電洞 h⁺'}</td></tr>
+            <tr><td><b>VGS = 0V 時電流</b></td><td><b>ID ≈ IDSS</b>（需在飽和區）</td><td><b>ID ≈ IDSS</b>（需在飽和區）</td><td><b>ID ≈ 0</b>（理想模型）</td></tr>
+            <tr><td><b>合法工作 VGS</b></td><td>${n ? '僅負偏壓 (VP ≦ VGS ≦ 0V)' : '僅正偏壓 (0V ≦ VGS ≦ VP)'}</td><td><b>可負、可零、可正（雙模式）</b></td><td>${n ? '須正偏壓 VGS ≧ VT (>0)' : '須負偏壓 VGS ≦ VT (<0)'}</td></tr>
+            <tr><td><b>飽和區電流公式</b></td><td><code>IDSS(1 − VGS/VP)²</code></td><td><code>IDSS(1 − VGS/VP)²</code></td><td><code>K(VGS − VT)²</code></td></tr>
+            <tr><td><b>歐姆／飽和邊界</b></td><td><code>${n ? 'VDS ≧ VGS − VP' : 'VSD ≧ VP − VGS'}</code></td><td><code>${n ? 'VDS ≧ VGS − VP' : 'VSD ≧ VP − VGS'}</code></td><td><code>${n ? 'VDS ≧ VGS − VT' : 'VSD ≧ VT − VGS'}</code></td></tr>
+            <tr><td><b>輸入阻抗 Rin</b></td><td>高（約 10⁸ ～ 10⁹ Ω）</td><td>極高（10¹² ～ 10¹⁴ Ω）</td><td>極高（10¹² ～ 10¹⁴ Ω）</td></tr>
+            <tr><td><b>代表應用</b></td><td>高阻抗低雜訊前級放大</td><td>雙極性訊號高頻放大器</td><td><b>CMOS 數位邏輯、BS170 功率開關</b></td></tr>
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    if (sub === "qa") {
+      setBanner("ok", `🙋 <strong>高二電子科「學習夥伴」概念 7 問</strong>：點擊任一張問題卡片展開最白話的破盲點詳解！`);
+      setPill("ok", "🙋 學生視角 7 大卡關點全破除");
+
+      return `<div class="stage-scroll">
+        <div class="qa-grid">
+          ${STUDENT_QA.map((item, idx) => {
+            const open = !!state.u8OpenQa[idx];
+            return `<div class="qa-card ${open ? 'open' : ''}" data-qa="${idx}" role="button" tabindex="0" aria-expanded="${open}">
+              <div class="qa-q"><span>${item.q}</span><span class="qa-arrow">${open ? '▲ 收合' : '▼ 看解答'}</span></div>
+              ${open ? `<div class="qa-a">${item.a}</div>` : ''}
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+    }
+
+    // Quiz Mode
+    let answered = 0, correct = 0;
+    QUIZ_DATA.forEach((q, idx) => {
+      if (typeof state.u8Answers[idx] === "number") {
+        answered++;
+        if (state.u8Answers[idx] === q.ans) correct++;
+      }
+    });
+    setBanner("ok", `🏆 <strong>統測＆實習闖關測驗</strong>：已作答 <strong>${answered} / ${QUIZ_DATA.length}</strong> 題 ｜ 目前答對 <strong>${correct}</strong> 題（得分 <strong>${Math.round((correct / QUIZ_DATA.length) * 100)} 分</strong>）`);
+    setPill("ok", `🏆 答對 ${correct} / ${QUIZ_DATA.length} 題`);
+
+    return `<div class="stage-scroll">
+      <div class="quiz-list">
+        ${QUIZ_DATA.map((item, qIdx) => {
+          const picked = state.u8Answers[qIdx];
+          const done = typeof picked === "number";
+          return `<div class="quiz-card ${done ? (picked === item.ans ? 'correct' : 'incorrect') : ''}">
+            <div class="quiz-q">${item.q}</div>
+            <div class="quiz-opts">
+              ${item.opts.map((opt, oIdx) => {
+                let cls = "quiz-opt";
+                if (done) {
+                  if (oIdx === item.ans) cls += " right";
+                  else if (oIdx === picked) cls += " wrong";
+                }
+                return `<button class="${cls}" data-q="${qIdx}" data-o="${oIdx}">${String.fromCharCode(65 + oIdx)}. ${opt}</button>`;
+              }).join("")}
+            </div>
+            ${done ? `<div class="quiz-exp ${picked === item.ans ? 'ok' : 'err'}">
+              <b>${picked === item.ans ? '✅ 答對了！' : '❌ 差一點點！正確答案是 (' + String.fromCharCode(65 + item.ans) + ')'}</b><br>${item.exp}
+            </div>` : ''}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+  }
+
+  // =========================================================
+  // UNIT 9: Full HD Narrated Video Theater & Diagram Gallery
+  // =========================================================
+  function renderUnit9() {
+    setBanner("ok", `🎬 <strong>Full HD 全語音動畫教學劇場</strong>：內建 5 分 11 秒繁體中文語音旁白＋動態字幕影片，可點下方按鈕直接跳轉七大章節！`);
+    setPill("ok", "🎬 1080p 語音動畫劇場");
+
+    const diagFiles = [
+      ["01_FET家族樹與電路符號總覽.png", "圖卡01：家族樹與六大符號"],
+      ["02_JFET空乏區與夾止物理機制.png", "圖卡02：JFET 空乏區與夾止"],
+      ["03_DMOS與EMOS橫截面工作原理.png", "圖卡03：D-MOS 與 E-MOS 截面"],
+      ["04_轉移曲線與輸出特性曲線對照.png", "圖卡04：雙特性曲線與公式"],
+      ["05_進階效應_通道調變與寄生體二極體.png", "圖卡05：通道調變與體二極體"],
+      ["06_FET三隻腳實習量測與基底連接影響.png", "圖卡06：三隻腳量測與基底連接"]
+    ];
+
+    return `<div class="stage-scroll" style="padding:12px"><div class="asset-notice">舊版影片與圖卡未重製；腳位與量測限制請以 V2 單元 8 解說為準。</div>
+      <div style="background:#2a1445;border-radius:12px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,.14)">
+        <video id="lessonVideo" controls preload="metadata" style="width:100%;max-height:390px;border-radius:8px;display:block;background:#000" src="./FET_JFET_MOSFET_原理動畫影片.mp4">
+          您的瀏覽器不支援 HTML5 影片播放。
+        </video>
+        <div id="videoFallbackMsg" hidden style="color:#fde047;padding:12px;font-size:13px;text-align:center">
+          ⚠️ 找不到同目錄下的 <code>FET_JFET_MOSFET_原理動畫影片.mp4</code>。搬移教材時請將整個 <code>FET_JFET_MOSFET_教學動畫</code> 資料夾一併複製（前 9 個互動單元無須影片檔即可獨立運作）。
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-size:13px;font-weight:700;color:#3a1a5c;margin-bottom:8px">🖼️ 附屬高解析教學圖卡快速檢視（點擊可於新分頁開啟原始大圖投影）：</div>
+        <div class="gallery-grid">
+          ${diagFiles.map(([fn, cap]) => `
+            <a href="./diagrams/${fn}" target="_blank" style="text-decoration:none;background:#fff;border:1px solid #e0d0f0;border-radius:8px;padding:6px;display:block;color:#333333;font-size:11.5px;font-weight:600;text-align:center">
+              <img src="./diagrams/${fn}" alt="${cap}" style="width:100%;height:68px;object-fit:cover;border-radius:4px;margin-bottom:4px" onerror="this.style.display='none'">
+              <div>${cap}</div>
+            </a>
+          `).join("")}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // =========================================================
+  // Controls & Preset Bar Builder per Unit
+  // =========================================================
+  function renderControlsForPage(mode) {
+    document.getElementById('lesson').dataset.mode = mode;
+    const cam = document.getElementById("cameraControls");
+    const bar = document.getElementById("presetBar");
+    cam.innerHTML = "";
+    bar.hidden = false;
+
+    if (mode === "u1_intro") {
+      bar.innerHTML = `
+        <span>元件切換：</span>
+        <button data-u1fam="jfet" class="${state.u1Fam==='jfet'?'active-toggle':''}">JFET 接面型</button>
+        <button data-u1fam="dmos" class="${state.u1Fam==='dmos'?'active-toggle':''}">D-MOS 空乏型</button>
+        <button data-u1fam="emos" class="${state.u1Fam==='emos'?'active-toggle':''}">E-MOS 增強型</button>
+        <span style="margin-left:6px">通道：</span>
+        <button data-u1ch="1" class="${state.u1NChan?'active-toggle':''}">N 通道</button>
+        <button data-u1ch="0" class="${!state.u1NChan?'active-toggle':''}">P 通道</button>
+        <button data-u1xray="1" class="${state.u1Xray?'active-toggle':''}">🔦 X光結構透視</button>
+        ${state.u1Fam !== 'jfet' ? `<button data-u1simp="1" class="${state.u1Simp?'active-toggle':''}">🔄 對照三腳簡化符號</button>` : ''}`;
+    } else if (mode === "u2_jfet") {
+      cam.innerHTML = [
+        ["carrier", "🔵 顯示載子流 (e⁻/h⁺)"],
+        ["conv", "🔴 顯示傳統電流 ID"],
+        ["both", "⚡ 雙流同框對照"]
+      ].map(([k, lbl]) => `<button data-flow="${k}" class="${state.flowMode===k?'active-toggle':''}">${lbl}</button>`).join("");
+
+      const minV = state.u2NChan ? -4.5 : -0.8;
+      const maxV = state.u2NChan ? 0.8 : 4.5;
+      bar.innerHTML = `
+        <button data-u2ch="1" class="${state.u2NChan?'active-toggle':''}">N 通道</button>
+        <button data-u2ch="0" class="${!state.u2NChan?'active-toggle':''}">P 通道</button>
+        <label class="slider-lbl">閘極 VGS：<input id="slU2Vgs" type="range" min="${minV}" max="${maxV}" step="0.1" value="${state.u2Vgs}"> <b id="lblU2Vgs">${state.u2Vgs>=0?'+':''}${state.u2Vgs.toFixed(1)}V</b></label>
+        <button data-u2pre="0">全開 0V</button>
+        <button data-u2pre="${state.u2NChan?-2.0:2.0}">半壓 ${state.u2NChan?'-2V':'+2V'}</button>
+        <button data-u2pre="${state.u2NChan?-4.0:4.0}">截止 VP</button>
+        <button data-u2pre="${state.u2NChan?0.7:-0.7}" class="warn-btn">⚠️ 順偏誤觸</button>`;
+    } else if (mode === "u3_pinchoff") {
+      bar.innerHTML = `
+        <label class="slider-lbl">VGS：<input id="slU3Vgs" type="range" min="-4.0" max="0.0" step="0.5" value="${state.u3Vgs}"> <b id="lblU3Vgs">${state.u3Vgs.toFixed(1)}V</b></label>
+        <label class="slider-lbl">汲極 VDS：<input id="slU3Vds" type="range" min="0.0" max="10.0" step="0.2" value="${state.u3Vds}"> <b id="lblU3Vds">+${state.u3Vds.toFixed(1)}V</b></label>
+        <button data-u3pre="ohmic">① 歐姆區(開關)</button>
+        <button data-u3pre="edge">② 剛達夾止點</button>
+        <button data-u3pre="sat" class="primary">③ 飽和區(夾止瀑布!)</button>
+        <button data-u3pre="cut">④ 截止封死</button>`;
+    } else if (mode === "u4_dmos") {
+      bar.innerHTML = `
+        <label class="slider-lbl">閘極 VGS（可負可正！）：<input id="slU4Vgs" type="range" min="-4.5" max="2.5" step="0.1" value="${state.u4Vgs}"> <b id="lblU4Vgs">${state.u4Vgs>=0?'+':''}${state.u4Vgs.toFixed(1)}V</b></label>
+        <button data-u4pre="-4.0">截止(-4V)</button>
+        <button data-u4pre="-2.0">空乏(-2V)</button>
+        <button data-u4pre="0.0">零偏壓(IDSS)</button>
+        <button data-u4pre="1.5" class="primary">✨ 增強(+1.5V)</button>
+        <button data-u4pre="2.4">強增強(+2.4V)</button>`;
+    } else if (mode === "u5_emos") {
+      cam.innerHTML = `<button data-u5pin="1" class="${state.u5Pinout?'active-toggle':''}">📦 ${state.u5Pinout?'返回截面說明':'顯示 BS170 實習腳位'}</button>`;
+      bar.innerHTML = `
+        <label class="slider-lbl">閘極正電壓 VGS（VT=+2V）：<input id="slU5Vgs" type="range" min="0.0" max="6.0" step="0.1" value="${state.u5Vgs}"> <b id="lblU5Vgs">+${state.u5Vgs.toFixed(1)}V</b></label>
+        <button data-u5pre="0.0">① 0V 常閉斷路</button>
+        <button data-u5pre="1.3">② +1.3V 排空電洞</button>
+        <button data-u5pre="2.0">③ +2.0V 剛達 VT</button>
+        <button data-u5pre="4.8" class="primary">④ +4.8V 造橋點亮LED！</button>`;
+    } else if (mode === "u6_curves") {
+      const d = state.u6Dev;
+      const minVg = d === "jfet" ? -4.0 : (d === "dmos" ? -4.0 : 0.0);
+      const maxVg = d === "jfet" ? 0.0 : (d === "dmos" ? 1.5 : 6.0);
+      bar.innerHTML = `
+        <button data-u6dev="jfet" class="${d==='jfet'?'active-toggle':''}">N-JFET</button>
+        <button data-u6dev="dmos" class="${d==='dmos'?'active-toggle':''}">N-D-MOS</button>
+        <button data-u6dev="emos" class="${d==='emos'?'active-toggle':''}">N-E-MOS</button>
+        <button data-u6dev="pk" class="${d==='pk'?'active-toggle':''}">📊 三大家族同框 PK</button>
+        ${d !== "pk" ? `
+          <label class="slider-lbl">VGS：<input id="slU6Vgs" type="range" min="${minVg}" max="${maxVg}" step="0.1" value="${state.u6Vgs}"> <b id="lblU6Vgs">${state.u6Vgs.toFixed(1)}V</b></label>
+          <label class="slider-lbl">VDS：<input id="slU6Vds" type="range" min="0.0" max="10.0" step="0.2" value="${state.u6Vds}"> <b id="lblU6Vds">${state.u6Vds.toFixed(1)}V</b></label>
+        ` : ''}`;
+    } else if (mode === "u7_adv") {
+      const t = state.u7Tab;
+      let extra = "";
+      if (t === "clm") {
+        extra = `
+          <label class="slider-lbl">調變參數 λ：<input id="slU7Lam" type="range" min="0.00" max="0.06" step="0.01" value="${state.u7Lambda}"> <b id="lblU7Lam">${state.u7Lambda.toFixed(2)} V⁻¹</b></label>
+          <label class="slider-lbl">VDS：<input id="slU7Vds" type="range" min="0.5" max="12.0" step="0.5" value="${state.u7Vds}"> <b id="lblU7Vds">${state.u7Vds.toFixed(1)}V</b></label>`;
+      } else if (t === "bodydiode") {
+        extra = `
+          <button data-u7rev="toggle" class="${state.u7Reversed?'warn-btn':'primary'}">${state.u7Reversed ? '↺ 改回正確 D、S 腳位' : '💥 把 D、S 兩隻腳插反！'}</button>
+          <label class="slider-lbl">閘極 VGS：<input id="slU7Vgs" type="range" min="0.0" max="5.0" step="0.5" value="${state.u7Vgs}"> <b id="lblU7Vgs">${state.u7Vgs.toFixed(1)}V</b></label>`;
+      } else {
+        extra = `
+          <button data-u7zener="toggle" class="${state.u7Zener?'active-toggle':''}">🛡️ ${state.u7Zener ? '齊納保護：已開啟' : '加裝齊納保護二極體'}</button>
+          <button data-u7zap="1" class="warn-btn">⚡ 手指帶 3000V 靜電觸碰閘極！</button>
+          ${state.u7EsdBlown ? `<button data-u7fix="1" class="primary">🔧 更換新 MOSFET</button>` : ''}`;
+      }
+      bar.innerHTML = `
+        <button data-u7tab="clm" class="${t==='clm'?'active-toggle':''}">🔬 ① 通道調變 λ</button>
+        <button data-u7tab="bodydiode" class="${t==='bodydiode'?'active-toggle':''}">💥 ② D/S插反體二極體</button>
+        <button data-u7tab="esd" class="${t==='esd'?'active-toggle':''}">⚡ ③ 靜電擊穿玻璃</button>
+        ${extra}`;
+    } else if (mode === "u8_quiz") {
+      bar.innerHTML = `
+        <button data-u8sub="table" class="${state.u8Sub==='table'?'active-toggle':''}">📋 一頁終極比較總表</button>
+        <button data-u8sub="qa" class="${state.u8Sub==='qa'?'active-toggle':''}">🙋 學習夥伴 7 大靈魂 Q&A</button>
+        <button data-u8sub="quiz" class="${state.u8Sub==='quiz'?'active-toggle':''}">🏆 10 題統測＆實習闖關測驗</button>
+        ${state.u8Sub === 'table' ? `<button data-u8ch="toggle" style="margin-left:auto">🔄 切換為 ${state.u8NChan ? 'P 通道極性表' : 'N 通道極性表'}</button>` : ''}
+        ${state.u8Sub === 'quiz' ? `<button data-u8reset="1" style="margin-left:auto">↺ 重新作答</button>` : ''}`;
+    } else if (mode === "u8_pinlab") {
+      renderPinControls();
+    } else if (mode === "u9_video") {
+      bar.innerHTML = `
+        <span>章節跳轉：</span>
+        <button data-vidjump="0">① 0:00 符號辨識</button>
+        <button data-vidjump="42.7">② 0:42 JFET擠壓</button>
+        <button data-vidjump="78.7">③ 1:18 夾止瀑布</button>
+        <button data-vidjump="121.6">④ 2:01 D-MOS雙向</button>
+        <button data-vidjump="157.0">⑤ 2:37 E-MOS造橋</button>
+        <button data-vidjump="193.7">⑥ 3:13 進階防呆</button>
+        <button data-vidjump="237.2" class="primary">⑦ 3:57 實習三隻腳量測</button>`;
+    }
+  }
+
+  // =========================================================
+  // 60fps Carrier Particle Animator (Zero Slider Interruption!)
+  // =========================================================
+  let animPhase = 0;
+  let lastTs = performance.now();
+
+  function tick(now) {
+    const dt = Math.min(0.05, (now - lastTs) / 1000);
+    lastTs = now;
+    if (state.playing) {
+      animPhase = (animPhase + dt * state.speed) % 1000;
+    }
+
+    const layer = document.getElementById("dynAnimLayer");
+    if (layer) {
+      const mode = pages[state.pageIndex].mode;
+      if (mode === "u1_intro") {
+        // Animate IB particles (top) & majority carriers (bottom)
+        let html = "";
+        for (let i = 0; i < 4; i++) {
+          const bx = 86 + ((animPhase * 95 + i * 36) % 138);
+          html += `<circle cx="${bx.toFixed(1)}" cy="172" r="4.5" fill="#f59e0b"/>`;
+          const cy1 = 112 + ((animPhase * 110 + i * 32) % 120);
+          html += `<circle cx="262" cy="${cy1.toFixed(1)}" r="5" fill="#dc2626"/>`;
+        }
+        for (let i = 0; i < 5; i++) {
+          const fy = 468 - ((animPhase * 115 + i * 27) % 130);
+          html += `<circle cx="220" cy="${fy.toFixed(1)}" r="5.5" fill="${state.u1NChan ? '#1d6fa5' : '#c96a1b'}" stroke="#fff" stroke-width="1.2"/>`;
+        }
+        layer.innerHTML = html;
+      } else if (mode === "u2_jfet") {
+        const id = parseFloat(layer.dataset.id || "0");
+        const depW = parseFloat(layer.dataset.dep || "20");
+        const nChan = layer.dataset.nchan === "1";
+        const isLeak = layer.dataset.leak === "1";
+        let html = "";
+        if (id > 0.08) {
+          const spd = 45 + id * 14;
+          const freeHalf = Math.max(5, 110 - depW);
+          const count = Math.max(3, Math.min(12, Math.round(2 + id * 1.1)));
+          const showCarrier = state.flowMode === "carrier" || state.flowMode === "both";
+          const showConv = state.flowMode === "conv" || state.flowMode === "both";
+
+          if (showCarrier) {
+            for (let i = 0; i < count; i++) {
+              // Majority carriers ALWAYS originate from Source S (bottom y=452) and move to Drain D (top y=102)!
+              const y = 452 - ((animPhase * spd + i * (350 / count)) % 350);
+              const lane = ((i % 3) - 1) * freeHalf * 0.42 - (state.flowMode === "both" ? 8 : 0);
+              const x = 260 + lane;
+              html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" fill="${nChan ? '#1d6fa5' : '#ea580c'}" stroke="#fff" stroke-width="1.4"/>`;
+            }
+          }
+          if (showConv) {
+            for (let i = 0; i < Math.max(3, Math.round(count * 0.75)); i++) {
+              // For N-ch, conventional current ID is D -> S (downward); for P-ch, S -> D (upward)!
+              const prog = (animPhase * spd + i * (350 / Math.max(3, Math.round(count * 0.75)))) % 350;
+              const y = nChan ? (102 + prog) : (452 - prog);
+              const x = 260 + (state.flowMode === "both" ? 12 : 0);
+              html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#dc2626"/>`;
+            }
+          }
+        }
+        if (isLeak) {
+          for (let i = 0; i < 4; i++) {
+            const lx = 210 - ((animPhase * 90 + i * 28) % 110);
+            html += `<circle cx="${lx.toFixed(1)}" cy="278" r="5" fill="#dc2626"/>`;
+          }
+        }
+        layer.innerHTML = html;
+      } else if (mode === "u3_pinchoff") {
+        const id = parseFloat(layer.dataset.id || "0");
+        const pinched = layer.dataset.pinch === "1";
+        let html = "";
+        if (id > 0.08) {
+          const n = 9;
+          for (let i = 0; i < n; i++) {
+            let u = ((animPhase * (0.22 + 0.35 * (id / 8.0)) + i / n) % 1.0);
+            // Accelerate dramatically in top waterfall zone when pinched off!
+            if (pinched && u > 0.68) {
+              u = 0.68 + Math.pow((u - 0.68) / 0.32, 0.52) * 0.32;
+            }
+            const y = 450 - u * 348;
+            html += `<circle cx="242" cy="${y.toFixed(1)}" r="${pinched && u > 0.72 ? 5 : 6.2}" fill="#1d6fa5" stroke="#fff" stroke-width="1.4"/>`;
+          }
+        }
+        layer.innerHTML = html;
+      } else if (mode === "u4_dmos") {
+        const id = parseFloat(layer.dataset.id || "0");
+        const thick = parseFloat(layer.dataset.thick || "0");
+        let html = "";
+        if (id > 0.08 && thick > 3) {
+          const n = Math.min(14, Math.max(2, Math.round(id * 1.1)));
+          const spd = 45 + id * 10;
+          for (let i = 0; i < n; i++) {
+            const x = 132 + ((animPhase * spd + i * (238 / n)) % 238);
+            const y = 176 + Math.min(thick - 4, 6 + (i % 3) * Math.max(4, (thick - 12) / 2));
+            html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#0369a1" stroke="#fff" stroke-width="1.2"/>`;
+          }
+        }
+        layer.innerHTML = html;
+      } else if (mode === "u5_emos") {
+        const id = parseFloat(layer.dataset.id || "0");
+        const inv = parseFloat(layer.dataset.inv || "0");
+        let html = "";
+        if (id > 0.05 && inv > 4) {
+          const n = Math.min(12, Math.max(3, Math.round(2 + id * 1.1)));
+          const spd = 50 + id * 13;
+          for (let i = 0; i < n; i++) {
+            const x = 126 + ((animPhase * spd + i * (230 / n)) % 230);
+            const y = 173 + inv * 0.5;
+            html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#0284c7" stroke="#fff" stroke-width="1.2"/>`;
+          }
+          // Conventional current down LED wire
+          for (let i = 0; i < 3; i++) {
+            const ly = 75 + ((animPhase * 75 + i * 33) % 96);
+            html += `<circle cx="414" cy="${ly.toFixed(1)}" r="4.2" fill="#dc2626"/>`;
+          }
+        }
+        layer.innerHTML = html;
+      } else if (mode === "u7_adv" && layer.dataset.unit === "u7_bd") {
+        const on = layer.dataset.on === "1";
+        const rev = layer.dataset.rev === "1";
+        let html = "";
+        if (on) {
+          for (let i = 0; i < 6; i++) {
+            if (rev) {
+              const bx = 175 + ((animPhase * 120 + i * 46) % 275);
+              html += `<circle cx="${bx.toFixed(1)}" cy="346" r="5.5" fill="#dc2626" stroke="#fde047" stroke-width="1.2"/>`;
+            } else {
+              const cx = 258 + ((animPhase * 95 + i * 25) % 146);
+              html += `<circle cx="${cx.toFixed(1)}" cy="209" r="4.8" fill="#0284c7" stroke="#fff" stroke-width="1"/>`;
+            }
+          }
+        }
+        layer.innerHTML = html;
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+
+  // =========================================================
+  // UNIT 8 (new): 電子學實習 — 三用電表判斷 FET 三隻腳 + 基底連接透視
+  // =========================================================
+
+  function renderUnitPin() {
+    setBanner('ok', '先理解接面、絕緣層與體二極體，再進入獨立實作頁。');
+    setPill('ok', 'P8 · 量測原理');
+    return `<div class="stage-scroll principle-page">
+      <h2>量測前，先看電流能走哪條路</h2>
+      <div class="principle-grid">
+        <article><h3>JFET：接面與通道</h3><svg viewBox="0 0 440 220" role="img" aria-label="JFET 閘極接面與源汲通道"><rect x="110" y="40" width="220" height="140" rx="10" fill="#bfdbfe" stroke="#1d6fa5"/><rect x="110" y="65" width="65" height="90" fill="#fecaca"/><path d="M45 110 H110 M220 40 V15 M220 180 V205" stroke="#333" stroke-width="4"/><text x="30" y="100">G</text><text x="235" y="25">D</text><text x="235" y="210">S</text><text x="120" y="115">閘極接面</text><text x="215" y="115">通道</text></svg><p>G 對 S、D 可呈同極性的 PN 接面特徵；S、D 之間有通道。以 Ω 檔交叉確認，簡單靜態量測通常不能可靠區分 D 與 S。</p></article>
+        <article><h3>MOSFET：絕緣與體二極體</h3><svg viewBox="0 0 440 220" role="img" aria-label="MOSFET 絕緣閘極與體二極體"><rect x="155" y="40" width="175" height="140" rx="10" fill="#f5f0fc" stroke="#5a2d82"/><path d="M45 110 H110 M110 65 V155 M135 65 V155 M240 40 V15 M240 180 V205" fill="none" stroke="#333" stroke-width="4"/><text x="30" y="100">G</text><text x="250" y="25">D</text><text x="250" y="210">S</text><text x="165" y="100">G 與通道絕緣</text><text x="165" y="135">N 型：二極體 S → D</text><text x="165" y="160">P 型：二極體 D → S</text></svg><p>先將 G-S 放電，再看體二極體的方向。N 型用正 VGS 充電，P 型用負 VGS 充電；充電後再比較 D-S 導通。</p></article>
+      </div>
+      <div class="principle-summary"><b>判讀順序</b>　確認電表極性 → 六次正反量測 → 換檔交叉確認 → 查元件資料表。</div>
+    </div>`;
+  }
+  function renderPinControls() {
+    document.getElementById('cameraControls').innerHTML = '';
+    document.getElementById('presetBar').innerHTML = '<span>原理與實作分頁</span><a class="practice-link" href="./FET_接腳量測實作.html">開啟量測工作台 →</a>';
+  }
+  function renderStageOnly() {
+    const oldScroll = canvasStage.querySelector(".stage-scroll")?.scrollTop || 0;
+    const mode = pages[state.pageIndex].mode;
+    if (mode === "u1_intro") canvasStage.innerHTML = renderUnit1();
+    else if (mode === "u2_jfet") canvasStage.innerHTML = renderUnit2();
+    else if (mode === "u3_pinchoff") canvasStage.innerHTML = renderUnit3();
+    else if (mode === "u4_dmos") canvasStage.innerHTML = renderUnit4();
+    else if (mode === "u5_emos") canvasStage.innerHTML = renderUnit5();
+    else if (mode === "u6_curves") canvasStage.innerHTML = renderUnit6();
+    else if (mode === "u7_adv") canvasStage.innerHTML = renderUnit7();
+    else if (mode === "u8_pinlab") canvasStage.innerHTML = renderUnitPin();
+    else if (mode === "u8_quiz") canvasStage.innerHTML = renderUnit8();
+    else if (mode === "u9_video") {
+      canvasStage.innerHTML = renderUnit9();
+      const v = document.getElementById("lessonVideo");
+      if (v) {
+        v.addEventListener("error", () => {
+          const fb = document.getElementById("videoFallbackMsg");
+          if (fb) fb.hidden = false;
+        });
+      }
+    }
+    applyZoomTransform();
+    const scrollPanel = canvasStage.querySelector(".stage-scroll");
+    if (scrollPanel) scrollPanel.scrollTop = oldScroll;
+  }
+
+  function renderFullUnit() {
+    const mode = pages[state.pageIndex].mode;
+    renderControlsForPage(mode);
+    renderStageOnly();
+  }
+
+  function renderSidebar() {
+    const list = document.getElementById("pageList");
+    document.getElementById("pageTotal").textContent = pages.length + " 單元";
+    list.innerHTML = pages.map((p, idx) => `
+      <button class="page-item ${idx === state.pageIndex ? 'active' : ''}" data-page="${idx}">
+        <span class="number">${String(idx + 1).padStart(2, "0")}</span>
+        <span class="page-info">
+          <span class="page-title">${p.title}</span>
+          <span class="page-chapter">${p.chapter}</span>
+        </span>
+      </button>`).join("");
+  }
+
+  function commitCurrentNote() {
+    if (!state.editing) return;
+    pages[state.pageIndex].notesHtml = noteEditor.innerHTML;
+    try {
+      const map = {};
+      pages.forEach(p => { map[p.id] = p.notesHtml; });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(map));
+    } catch (_) {}
+  }
+
+  function goToPage(idx) {
+    commitCurrentNote();
+    const oldVid = document.getElementById("lessonVideo");
+    if (oldVid && !oldVid.paused) oldVid.pause();
+
+    state.pageIndex = Math.max(0, Math.min(pages.length - 1, idx));
+    state.zoom = 1; state.panX = 0; state.panY = 0;
+
+    const p = pages[state.pageIndex];
+    document.getElementById("chapterLabel").textContent = p.chapter;
+    document.getElementById("pageNumber").textContent = `${String(state.pageIndex + 1).padStart(2, "0")} / ${String(pages.length).padStart(2, "0")}`;
+    document.getElementById("navCount").textContent = `${state.pageIndex + 1} / ${pages.length}`;
+    document.getElementById("lessonTitle").textContent = p.title;
+    document.getElementById("observationTask").textContent = p.observation;
+    document.getElementById("notes").scrollTop = 0;
+    document.getElementById("mediaType").textContent = p.mediaLabel;
+    noteEditor.innerHTML = p.notesHtml;
+
+    document.getElementById("prevBtn").disabled = state.pageIndex === 0;
+    document.getElementById("nextBtn").disabled = state.pageIndex === pages.length - 1;
+
+    renderSidebar();
+    renderFullUnit();
+    const panel = canvasStage.querySelector(".stage-scroll");
+    if (panel) panel.scrollTop = 0;
+  }
+
+  // Smooth Range Slider Input Delegation (Updates Stage without destroying Slider DOM!)
+  presetBar.addEventListener("input", e => {
+    const el = e.target;
+    const val = parseFloat(el.value);
+    if (el.id === "slU2Vgs") {
+      state.u2Vgs = val;
+      document.getElementById("lblU2Vgs").textContent = (val >= 0 ? "+" : "") + val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU3Vgs") {
+      state.u3Vgs = val;
+      document.getElementById("lblU3Vgs").textContent = val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU3Vds") {
+      state.u3Vds = val;
+      document.getElementById("lblU3Vds").textContent = "+" + val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU4Vgs") {
+      state.u4Vgs = val;
+      document.getElementById("lblU4Vgs").textContent = (val >= 0 ? "+" : "") + val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU5Vgs") {
+      state.u5Vgs = val;
+      document.getElementById("lblU5Vgs").textContent = "+" + val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU6Vgs") {
+      state.u6Vgs = val;
+      document.getElementById("lblU6Vgs").textContent = val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU6Vds") {
+      state.u6Vds = val;
+      document.getElementById("lblU6Vds").textContent = val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU7Lam") {
+      state.u7Lambda = val;
+      document.getElementById("lblU7Lam").textContent = val.toFixed(2) + " V⁻¹";
+      renderStageOnly();
+    } else if (el.id === "slU7Vds") {
+      state.u7Vds = val;
+      document.getElementById("lblU7Vds").textContent = val.toFixed(1) + "V";
+      renderStageOnly();
+    } else if (el.id === "slU7Vgs") {
+      state.u7Vgs = val;
+      document.getElementById("lblU7Vgs").textContent = val.toFixed(1) + "V";
+      renderStageOnly();
+    }
+  });
+
+  // Button Clicks inside PresetBar
+  presetBar.addEventListener("click", e => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    
+    if (btn.dataset.u1fam) { state.u1Fam = btn.dataset.u1fam; renderFullUnit(); }
+    else if (btn.dataset.u1ch) { state.u1NChan = btn.dataset.u1ch === "1"; renderFullUnit(); }
+    else if (btn.dataset.u1xray) { state.u1Xray = !state.u1Xray; renderFullUnit(); }
+    else if (btn.dataset.u1simp) { state.u1Simp = !state.u1Simp; renderFullUnit(); }
+    else if (btn.dataset.u2ch) {
+      state.u2NChan = btn.dataset.u2ch === "1";
+      state.u2Vgs = state.u2NChan ? -1.2 : 1.2;
+      renderFullUnit();
+    }
+    else if (btn.dataset.u2pre !== undefined) { state.u2Vgs = parseFloat(btn.dataset.u2pre); renderFullUnit(); }
+    else if (btn.dataset.u3pre) {
+      const pr = btn.dataset.u3pre;
+      if (pr === "ohmic") { state.u3Vgs = 0.0; state.u3Vds = 1.2; }
+      else if (pr === "edge") { state.u3Vgs = -1.0; state.u3Vds = 3.0; }
+      else if (pr === "sat") { state.u3Vgs = -0.5; state.u3Vds = 7.5; }
+      else if (pr === "cut") { state.u3Vgs = -4.0; state.u3Vds = 6.0; }
+      renderFullUnit();
+    }
+    else if (btn.dataset.u4pre !== undefined) { state.u4Vgs = parseFloat(btn.dataset.u4pre); renderFullUnit(); }
+    else if (btn.dataset.u5pre !== undefined) { state.u5Vgs = parseFloat(btn.dataset.u5pre); renderFullUnit(); }
+    else if (btn.dataset.u6dev) {
+      state.u6Dev = btn.dataset.u6dev;
+      if (state.u6Dev === "jfet") { state.u6Vgs = -1.2; state.u6Vds = 5.0; }
+      else if (state.u6Dev === "dmos") { state.u6Vgs = 0.8; state.u6Vds = 6.0; }
+      else if (state.u6Dev === "emos") { state.u6Vgs = 4.5; state.u6Vds = 5.0; }
+      renderFullUnit();
+    }
+    else if (btn.dataset.u7tab) { state.u7Tab = btn.dataset.u7tab; renderFullUnit(); }
+    else if (btn.dataset.u7rev) { state.u7Reversed = !state.u7Reversed; renderFullUnit(); }
+    else if (btn.dataset.u7zener) { state.u7Zener = !state.u7Zener; renderFullUnit(); }
+    else if (btn.dataset.u7zap) {
+      if (!state.u7Zener) state.u7EsdBlown = true;
+      renderFullUnit();
+    }
+    else if (btn.dataset.u7fix) { state.u7EsdBlown = false; renderFullUnit(); }
+    else if (btn.dataset.u8sub) { state.u8Sub = btn.dataset.u8sub; renderFullUnit(); }
+    else if (btn.dataset.u8ch) { state.u8NChan = !state.u8NChan; renderFullUnit(); }
+    else if (btn.dataset.u8reset) { state.u8Answers = {}; renderFullUnit(); }
+    else if (btn.dataset.vidjump !== undefined) {
+      const v = document.getElementById("lessonVideo");
+      if (v) {
+        v.currentTime = parseFloat(btn.dataset.vidjump);
+        v.play().catch(() => {});
+      }
+    }
+  });
+
+  cameraControls.addEventListener("click", e => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    
+    if (btn.dataset.flow) { state.flowMode = btn.dataset.flow; renderFullUnit(); }
+    else if (btn.dataset.u5pin) { state.u5Pinout = !state.u5Pinout; renderFullUnit(); }
+  });
+
+  // Interactive Clicks inside CanvasStage (Unit 8 Q&A and Quiz)
+  canvasStage.addEventListener("click", e => {
+    const qaCard = e.target.closest("[data-qa]");
+    if (qaCard) {
+      const idx = +qaCard.dataset.qa;
+      state.u8OpenQa[idx] = !state.u8OpenQa[idx];
+      renderStageOnly();
+      return;
+    }
+    const qBtn = e.target.closest("[data-q]");
+    if (qBtn) {
+      const qIdx = +qBtn.dataset.q;
+      const oIdx = +qBtn.dataset.o;
+      state.u8Answers[qIdx] = oIdx;
+      renderStageOnly();
+    }
+  });
+
+  document.getElementById("pageList").addEventListener("click", e => {
+    const item = e.target.closest("[data-page]");
+    if (item) goToPage(+item.dataset.page);
+  });
+
+  document.getElementById("prevBtn").addEventListener("click", () => goToPage(state.pageIndex - 1));
+  document.getElementById("nextBtn").addEventListener("click", () => goToPage(state.pageIndex + 1));
+  document.getElementById("toggleMenuBtn").addEventListener("click", () => document.body.classList.toggle("menu-hidden"));
+
+  document.getElementById("playPauseBtn").addEventListener("click", function() {
+    state.playing = !state.playing;
+    this.textContent = state.playing ? "⏸ 暫停動畫" : "▶ 播放動畫";
+  });
+
+  document.getElementById("speedSelect").addEventListener("change", function() {
+    state.speed = parseFloat(this.value) || 1;
+  });
+
+  function toggleValues() {
+    state.showValues = !state.showValues;
+    const btn = document.getElementById("toggleValuesBtn");
+    btn.classList.toggle("active-toggle", state.showValues);
+    btn.textContent = state.showValues ? "⚡ 隱藏電氣數值" : "⚡ 顯示電氣數值";
+    renderStageOnly();
+  }
+  document.getElementById("toggleValuesBtn").addEventListener("click", toggleValues);
+
+  // Zoom & Drag Pan
+  function setZoom(z) {
+    state.zoom = Math.max(0.5, Math.min(3.0, z));
+    if (state.zoom <= 1.01) { state.panX = 0; state.panY = 0; }
+    applyZoomTransform();
+  }
+  document.getElementById("zoomInBtn").addEventListener("click", () => setZoom(state.zoom + 0.25));
+  document.getElementById("zoomOutBtn").addEventListener("click", () => setZoom(state.zoom - 0.25));
+  document.getElementById("zoomResetBtn").addEventListener("click", () => { state.zoom = 1; state.panX = 0; state.panY = 0; applyZoomTransform(); });
+
+  canvasStage.addEventListener("wheel", e => {
+    if (!e.ctrlKey || e.target.closest(".stage-scroll")) return;
+    e.preventDefault();
+    setZoom(state.zoom + (e.deltaY < 0 ? 0.18 : -0.18));
+  }, { passive: false });
+
+  let dragStart = null;
+  canvasStage.addEventListener("pointerdown", e => {
+    if (state.zoom <= 1.02 || e.target.closest(".stage-scroll")) return;
+    dragStart = { x: e.clientX - state.panX, y: e.clientY - state.panY };
+    canvasStage.classList.add("panning");
+    canvasStage.setPointerCapture(e.pointerId);
+  });
+  canvasStage.addEventListener("pointermove", e => {
+    if (!dragStart) return;
+    state.panX = e.clientX - dragStart.x;
+    state.panY = e.clientY - dragStart.y;
+    applyZoomTransform();
+  });
+  canvasStage.addEventListener("pointerup", () => { dragStart = null; canvasStage.classList.remove("panning"); });
+
+  // Split Pane Resizer
+  const divider = document.getElementById("divider");
+  let resizing = false;
+  divider.addEventListener("pointerdown", e => { resizing = true; divider.setPointerCapture(e.pointerId); });
+  divider.addEventListener("pointermove", e => {
+    if (!resizing) return;
+    const rect = document.getElementById("lesson").getBoundingClientRect();
+    const pct = Math.max(38, Math.min(80, ((e.clientX - rect.left) / rect.width) * 100));
+    document.documentElement.style.setProperty("--media-share", pct.toFixed(1) + "%");
+  });
+  divider.addEventListener("pointerup", () => { resizing = false; });
+
+  // Edit Notes & Standalone HTML Export
+  document.getElementById("editModeBtn").addEventListener("click", function() {
+    commitCurrentNote();
+    state.editing = !state.editing;
+    noteEditor.contentEditable = state.editing ? "true" : "false";
+    document.getElementById("editHint").hidden = !state.editing;
+    document.getElementById("saveHtmlBtn").hidden = !state.editing;
+    this.textContent = state.editing ? "▶ 返回授課" : "✎ 編輯說明";
+    this.classList.toggle("active-toggle", state.editing);
+  });
+
+  noteEditor.addEventListener("input", commitCurrentNote);
+
+  document.getElementById("saveHtmlBtn").addEventListener("click", () => {
+    commitCurrentNote();
+    const clone = document.documentElement.cloneNode(true);
+    const dataTag = clone.querySelector("#pagesData");
+    dataTag.textContent = "\n" + JSON.stringify(pages, null, 2).replace(/</g, "\\u003c") + "\n";
+    clone.querySelector("#noteEditor").setAttribute("contenteditable", "false");
+    clone.querySelector("#noteEditor").innerHTML = "";
+    clone.querySelector("#canvasStage").innerHTML = "";
+    clone.querySelector("#pageList").innerHTML = "";
+    clone.querySelector("#editHint").setAttribute("hidden", "");
+    clone.querySelector("#saveHtmlBtn").setAttribute("hidden", "");
+    const eBtn = clone.querySelector("#editModeBtn");
+    eBtn.textContent = "✎ 編輯說明";
+    eBtn.classList.remove("active-toggle");
+    // Export retains the verified package timestamp; note edits are not a deployment.
+    const blob = new Blob(["<!doctype html>\n" + clone.outerHTML], { type: "text/html;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "FET_V2_課堂筆記.html";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  });
+
+  document.getElementById("fullBtn").addEventListener("click", () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {});
+    else document.exitFullscreen().catch(() => {});
+  });
+
+  document.addEventListener("keydown", e => {
+    if (state.editing || ["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+    if (e.key === "ArrowRight" || e.key === "PageDown") { e.preventDefault(); goToPage(state.pageIndex + 1); }
+    else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); goToPage(state.pageIndex - 1); }
+    else if (e.key === "Home") { e.preventDefault(); goToPage(0); }
+    else if (e.key === "End") { e.preventDefault(); goToPage(pages.length - 1); }
+    else if (e.key === " ") { e.preventDefault(); document.getElementById("playPauseBtn").click(); }
+    else if (e.key === "v" || e.key === "V") { e.preventDefault(); toggleValues(); }
+  });
+
+
+  const menuToggle = document.getElementById('toggleMenuBtn');
+  const syncMenu = () => menuToggle.setAttribute('aria-expanded', String(!document.body.classList.contains('menu-hidden')));
+  menuToggle.addEventListener('click', syncMenu);
+  document.getElementById('pageList').addEventListener('click', e => {
+    if (e.target.closest('[data-page]')) { document.body.classList.add('menu-hidden'); syncMenu(); menuToggle.focus(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { document.body.classList.add('menu-hidden'); syncMenu(); }
+    const card = e.target.closest?.('.qa-card');
+    if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopImmediatePropagation(); card.click(); canvasStage.querySelector('[data-qa="' + card.dataset.qa + '"]')?.focus(); }
+  }, true);
+  divider.addEventListener('keydown', e => {
+    if (!['ArrowLeft','ArrowRight'].includes(e.key)) return;
+    e.preventDefault(); e.stopPropagation();
+    const old = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--media-share'));
+    const value = Math.max(38, Math.min(80, old + (e.key === 'ArrowRight' ? 2 : -2)));
+    document.documentElement.style.setProperty('--media-share', value + '%');
+    divider.setAttribute('aria-valuenow', String(value));
+  });
+  divider.addEventListener('pointermove', () => {
+    divider.setAttribute('aria-valuenow', String(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--media-share'))));
+  });
+  canvasStage.addEventListener('pointercancel', () => { dragStart = null; canvasStage.classList.remove('panning'); });
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { state.playing = false; document.getElementById('playPauseBtn').textContent = '▶ 播放動畫'; }
+
+  const initHash = parseInt((location.hash || "").replace(/\D+/g, ""), 10);
+  goToPage(initHash >= 1 && initHash <= pages.length ? initHash - 1 : 0);
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FET 接腳量測實作｜yucs</title><style>
+[data-mode="u8_pinlab"] .media-controls{display:none}
+.principle-page{font-size:16px;line-height:1.65}.principle-page h2{color:#3a1a5c;font-size:23px;margin:4px 0 16px}.principle-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.principle-grid article{min-width:0;display:flex;flex-direction:column;background:#fff;border:1px solid #e0d0f0;border-radius:10px;padding:16px}.principle-grid h3{color:#5a2d82;margin:0}.canvas-stage .principle-grid svg{width:100%;height:auto;aspect-ratio:2 / 1;flex:none;display:block;font-family:Microsoft JhengHei,sans-serif;font-size:16px}.principle-grid article p{position:static;margin:12px 0 0;line-height:1.7;overflow-wrap:anywhere}.principle-summary{clear:both;padding:16px;background:#f5f0fc;margin:14px 0}.practice-link{display:inline-block;background:#5a2d82;color:#fff!important;text-decoration:none;padding:9px 14px;border-radius:7px;font-size:14px;font-weight:700}.practice-link:focus-visible{outline:3px solid #26734d;outline-offset:3px}@media(max-width:700px){.principle-grid{grid-template-columns:1fr}}
+
+:root{font-family:"Microsoft JhengHei",sans-serif;color:#333;background:#f0f2f5;color-scheme:light}*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}header{padding:14px 20px;background:linear-gradient(135deg,#3a1a5c,#5a2d82);color:white;display:flex;align-items:center;justify-content:space-between;gap:16px}header small{font-size:10px;letter-spacing:1.6px;color:#ede0ff}h1{font-size:23px;margin:3px 0}header a{color:#fff;text-decoration:none;border:1px solid #ffffff80;padding:9px;border-radius:6px}main{width:100%;max-width:1800px;margin:auto;padding:12px 20px;flex:1}.intro{margin:0 0 12px;color:#63566f;font-size:14px}.workbench{display:grid;grid-template-columns:1.1fr .85fr 1fr;gap:12px;align-items:stretch}.panel{background:#fff;border:1px solid #e0d0f0;border-radius:10px;padding:14px;min-width:0}h2{font-size:16px;color:#5a2d82;margin:0 0 10px}.panel-heading{display:flex;justify-content:space-between;gap:8px}.panel-heading span{font-size:12px;color:#63566f}.caption{font-size:12px;color:#68616f;margin:4px 0;line-height:1.6}svg{width:100%;display:block}.device-panel svg{height:280px}.meter-panel svg{height:215px}.meter-panel p{font-size:14px;line-height:1.6}table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px}th{background:#f5f0fc;color:#3a1a5c;text-align:left}th,td{padding:10px 5px;border-bottom:1px solid #ede0ff;overflow-wrap:anywhere}.record-matrix th,.record-matrix td{text-align:center}.record-matrix th:first-child{width:70px}.record-matrix td.current{box-shadow:inset 0 0 0 2px #5a2d82}tbody tr.current{background:#f5f0fc}.reading-on{color:#26734d;font-weight:700}.reading-off{color:#68616f}.workflow{padding:12px 0;border-bottom:2px solid #e0d0f0}.workflow p{font-size:14px;line-height:1.6;margin:6px 0 10px}.controls{margin-top:12px;padding:0 14px}.control-row{display:grid;grid-template-columns:85px 1fr;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #ede0ff}.control-row:last-child{border:0}.control-row h2{margin:0}.buttons{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;font-size:14px;border:1px solid #e0d0f0;border-radius:7px;padding:9px 13px;background:#fff;color:#3a1a5c;cursor:pointer}button:hover{background:#f5f0fc}button.selected{background:#ede0ff;border-color:#5a2d82;font-weight:700}button.primary{background:#5a2d82;color:#fff}button:disabled{opacity:.45;cursor:default}button:focus-visible,a:focus-visible{outline:3px solid #26734d;outline-offset:2px}.pair{border-left:3px solid #a12b35}.red{color:#a12b35}.black{color:#111827}.result{margin-top:12px;line-height:1.7}.result p{margin:5px 0}.model-note{font-size:12px;color:#68616f}footer{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 20px;padding:10px 12px;font-size:11px;color:#68616f;border-top:1px solid #e0d0f0}@media(max-width:1000px){.workbench{grid-template-columns:1fr 1fr}.record-panel{grid-column:1/-1}}@media(max-width:600px){header{padding:12px;flex-wrap:wrap}h1{font-size:20px}main{padding:12px}.workbench{grid-template-columns:1fr}.record-panel{grid-column:auto}.device-panel svg{height:240px}.control-row{grid-template-columns:1fr;gap:8px}.buttons{gap:6px}button{padding:9px;font-size:13px}}
+</style></head><body><header><div><small>YUCS · ELECTRONICS LAB</small><h1>FET 接腳量測實作</h1></div><a href="./index.html#8">← 返回 P8 量測原理</a></header><main><p class="intro">第一階段：找出 G。第二階段：只量另外兩腳，確認通道與導通方向。接腳名稱預設隱藏。</p><section class="workbench"><div class="panel device-panel"><div class="panel-heading"><h2 id="deviceTitle"></h2><span id="typeLabel"></span></div><div id="deviceDrawing"></div><p class="caption">TO-92 平面朝自己，三腳等距；先看腳號 1、2、3；可按「顯示接腳名稱」核對答案。</p></div><div class="panel meter-panel"><h2>電表讀值</h2><div id="meter"></div><p id="connection" role="status"></p><p id="chargeState"></p></div><div class="panel record-panel"><h2>量測紀錄</h2><div id="records"></div><p class="caption">紅－黑：紅棒接前一腳、黑棒接後一腳；黑－紅則交換。</p><details id="firstStage" hidden><summary>查看第一階段紀錄</summary><div id="firstRecords"></div></details></div></section><section class="panel controls" aria-label="量測操作"><div id="workflow" class="workflow"></div><div class="control-row"><h2>① 元件</h2><div id="devices" class="buttons"></div></div><div class="control-row"><h2>② 電表</h2><div id="meters" class="buttons"></div></div><div class="control-row"><h2>③ 量測</h2><div id="pairs" class="buttons"></div></div><div class="control-row"><h2>④ 操作</h2><div id="actions" class="buttons"></div></div></section><section class="panel result"><h2>觀察與判讀</h2><p id="conclusion" role="status"></p><p class="model-note">讀值與腳序為練習模型；實物接線前請查實際製造商與封裝資料表。可用顯示按鈕核對模型的接腳名稱。</p></section></main><footer><span>© __PAGES_BUILD_YEAR__ yucs. 版權所有。</span><span>程式部署時間：<time datetime="__PAGES_BUILD_DATETIME__">__PAGES_BUILD_TIME__</time></span></footer><script>(function practiceApp() {
+  'use strict';
+  const devices = {
+    k30a:{name:'2SK30A',type:'N 通道 JFET',kind:'njfet',g:2,d:3,s:1,r:480},
+    j74:{name:'2SJ74',type:'P 通道 JFET',kind:'pjfet',g:2,d:3,s:1,r:130},
+    bs170:{name:'BS170',type:'N 通道 E-MOSFET',kind:'nmos',g:2,d:1,s:3},
+    bs250:{name:'BS250',type:'P 通道 E-MOSFET',kind:'pmos',g:2,d:1,s:3}
+  };
+  const state={device:'k30a',meter:'digital',mode:'diode',red:1,black:3,charged:false,records:{},stage:1,gate:null,showRoles:false,firstRecords:{}};
+  const pairs=[[1,3],[3,1],[1,2],[2,1],[2,3],[3,2]];
+  const $=id=>document.getElementById(id);
+  function conduct(dev,plus,minus){
+    const ds=(plus===dev.d&&minus===dev.s)||(plus===dev.s&&minus===dev.d);
+    if(dev.kind==='njfet'&&plus===dev.g)return {v:.64};
+    if(dev.kind==='pjfet'&&minus===dev.g)return {v:.62};
+    if(dev.kind.endsWith('jfet'))return ds?{r:dev.r}:null;
+    if(state.charged&&ds)return {r:25};
+    if(dev.kind==='nmos'&&plus===dev.s&&minus===dev.d)return {v:.63};
+    if(dev.kind==='pmos'&&plus===dev.d&&minus===dev.s)return {v:.61};
+    return null;
+  }
+  function measure(red,black){
+    state.red=red;state.black=black;
+    const analog=state.meter==='analog';
+    const reading=conduct(devices[state.device],analog?black:red,analog?red:black);
+    let text=analog?'∞（不偏轉）':'OL',on=false;
+    if(reading){
+      if(analog){text='指針偏轉';on=true;}
+      else if(state.mode==='ohm'&&reading.r){text=reading.r+' Ω';on=true;}
+      else if(state.mode==='diode'&&reading.v){text=reading.v.toFixed(3)+' V';on=true;}
+      else if(state.mode==='diode'&&reading.r&&reading.r<=300){text=(reading.r/1000).toFixed(3)+' V';on=true;}
+      else text=reading.r?'OL（請換 Ω 檔）':'OL（請換二極體檔）';
+    }
+    state.records[red+'-'+black]={text,on};
+  }
+  function deviceSvg(dev){
+    const pins=[1,2,3].map((pin,i)=>{
+      const x=100+i*60,role=pin===dev.g?'G':pin===dev.d?'D':'S';
+      return `<line data-pin="${pin}" x1="${x}" y1="150" x2="${x}" y2="215" stroke="#8a949b" stroke-width="5"/>`+
+        `<text data-pin-label="${pin}" x="${x}" y="244" text-anchor="middle" font-size="17" fill="#333">${pin}${state.showRoles?" ("+role+")":""}</text>`+
+        (state.red===pin?`<circle data-probe="red" cx="${x}" cy="200" r="10" fill="#dc2626" stroke="#fff" stroke-width="2"/>`:'')+
+        (state.black===pin?`<circle data-probe="black" cx="${x}" cy="200" r="10" fill="#111827" stroke="#fff" stroke-width="2"/>`:'');
+    }).join('');
+    return `<svg viewBox="0 0 320 270" role="img" aria-label="${dev.name} 接腳與探棒位置"><path d="M70 150 V90 A90 65 0 0 1 250 90 V150 Z" fill="#374151" stroke="#111827" stroke-width="3"/><path d="M70 90 H250" stroke="#111827" stroke-width="3"/><text x="160" y="90" text-anchor="middle" fill="#fff" font-size="13">TO-92 平面朝自己</text><text x="160" y="122" text-anchor="middle" fill="#fde047" font-size="18" font-weight="700">${dev.name}</text>${pins}</svg>`;
+  }
+  function resetExercise(){state.stage=1;state.gate=null;state.records={};state.firstRecords={};state.charged=false;state.showRoles=false;}
+  function activePairs(){return state.stage===1?pairs:pairs.filter(([r,b])=>r!==state.gate&&b!==state.gate);}
+  function recordMatrix(records,columns,highlight=true){
+    return '<table class="record-matrix"><thead><tr><th scope="col">腳位對</th>'+columns.map(([a,b])=>`<th scope="col">${a}–${b}</th>`).join('')+'</tr></thead><tbody>'+[false,true].map(reverse=>'<tr><th scope="row">'+(reverse?'黑－紅':'紅－黑')+'</th>'+columns.map(([a,b])=>{
+      const red=reverse?b:a,black=reverse?a:b,rec=records[red+'-'+black];
+      return `<td data-reading="${red}-${black}" title="紅棒接 ${red}、黑棒接 ${black}" aria-label="紅棒接 ${red}、黑棒接 ${black}：${rec?rec.text:'未量測'}" class="${rec?.on?'reading-on':'reading-off'} ${highlight&&red===state.red&&black===state.black?'current':''}">${rec?(rec.on?'✓ ':'')+rec.text:'—'}</td>`;
+    }).join('')+'</tr>').join('')+'</tbody></table>';
+  }
+  function render(){
+    const dev=devices[state.device],mos=!dev.kind.endsWith('jfet'),pmos=dev.kind==='pmos';
+    $('deviceTitle').textContent=dev.name;$('typeLabel').textContent=dev.type;
+    $('deviceDrawing').innerHTML=deviceSvg(dev);
+    const cur=state.records[state.red+'-'+state.black];
+    const analog=state.meter==='analog';
+    $('meter').innerHTML=analog?`<svg viewBox="0 0 300 185" role="img" aria-label="指針表"><rect x="10" y="10" width="280" height="165" rx="12" fill="#f5f0fc" stroke="#5a2d82"/><path d="M50 140 A100 100 0 0 1 250 140" fill="none" stroke="#5a2d82"/><text x="40" y="100">∞</text><text x="245" y="100">0 Ω</text><line x1="150" y1="140" x2="${cur?.on?218:60}" y2="${cur?.on?67:105}" stroke="#a12b35" stroke-width="3"/><circle cx="150" cy="140" r="5" fill="#5a2d82"/></svg>`:`<svg viewBox="0 0 300 185" role="img" aria-label="數位電表"><rect x="10" y="10" width="280" height="165" rx="12" fill="#f5f0fc" stroke="#5a2d82"/><rect x="25" y="30" width="250" height="80" rx="6" fill="#fff" stroke="#e0d0f0"/><text x="150" y="80" text-anchor="middle" fill="#3a1a5c" font-size="${cur?.text.length>12?13:22}">${cur?.text||'— — —'}</text><text x="150" y="145" text-anchor="middle" font-size="15">${state.mode==='diode'?'二極體檔':'電阻檔 Ω'}</text></svg>`;
+    $('connection').innerHTML=`<span class="red">紅棒：腳 ${state.red}</span>　<span class="black">黑棒：腳 ${state.black}</span><br>${analog?'指針表：黑＋、紅−':'數位表：紅＋、黑−'}（本模型設定）`;
+    $('chargeState').textContent=state.stage===1?'先比較三腳的接面或絕緣特徵，找出 G。':mos?(state.charged?'已充電：比較另兩腳正反向導通':'已放電：量另外兩腳的正反方向'):'用 Ω 檔確認另兩腳是否有通道電阻。';
+    $('records').innerHTML=recordMatrix(state.records,state.stage===1?[[1,2],[1,3],[2,3]]:[[1,2],[1,3],[2,3]].filter(pair=>!pair.includes(state.gate)));
+    $('firstStage').hidden=state.stage!==2;
+    $('firstRecords').innerHTML=recordMatrix(state.firstRecords,[[1,2],[1,3],[2,3]],false);
+    $('devices').innerHTML=Object.entries(devices).map(([key,d])=>`<button data-device="${key}" class="${key===state.device?'selected':''}" aria-pressed="${key===state.device}">${d.name}</button>`).join('');
+    $('meters').innerHTML=`<button data-meter="digital" class="${!analog?'selected':''}">數位表（紅＋黑−）</button><button data-meter="analog" class="${analog?'selected':''}">指針表（黑＋紅−）</button><button data-mode="diode" ${analog?'disabled':''} class="${!analog&&state.mode==='diode'?'selected':''}">二極體檔</button><button data-mode="ohm" ${analog?'disabled':''} class="${analog||state.mode==='ohm'?'selected':''}">Ω 檔</button>`;
+    $('pairs').innerHTML=activePairs().map(([r,b])=>`<button class="pair ${r===state.red&&b===state.black?'selected':''}" data-pair="${r}-${b}">紅${r}／黑${b}</button>`).join('')+'<button class="primary" data-action="all">'+(state.stage===1?'第一階段：量六組找 G':'第二階段：量其餘兩腳正反向')+'</button>';
+    $('actions').innerHTML=`<button data-action="charge" ${!mos||state.stage===1?'disabled':''}>${pmos?'G 接負、S 接正充電':'G 接正、S 接負充電'}</button><button data-action="discharge" ${!mos||state.stage===1?'disabled':''}>G-S 短路放電</button><button data-action="clear">清除本階段紀錄</button><button data-action="roles" aria-pressed="${state.showRoles}">${state.showRoles?'隱藏接腳名稱':'顯示接腳名稱'}</button><button data-action="restart">重新找 G</button>`;
+    const count=Object.keys(state.records).length;
+    $('workflow').innerHTML=`<h2>${state.stage===1?'第一階段 · 找出閘極 G':'第二階段 · 量另外兩腳'}</h2><p>${state.stage===1?'先完成六次量測，再選出你認為是 G 的腳號。JFET 找共同接面端；MOSFET 找絕緣端。':`已確認 G 是腳 ${state.gate}。第一階段六筆紀錄已保留，現在只量腳 ${activePairs()[0].join('、')}。`}</p><div id="gateChoices" class="buttons">${state.stage===1?[1,2,3].map(n=>`<button data-gate="${n}" ${count<6?'disabled':''}>腳 ${n} 是 G</button>`).join(''):''}</div>`;
+    let detail='';
+    if(state.stage===1)detail=count<6?`請先完成 ${6-count} 次量測。`:'紀錄已齊，請根據讀值選出 G；答對後進入第二階段。';
+    else if(count<2)detail='請量另外兩腳的正反方向，完成兩筆紀錄後再判讀。';
+    else if(!mos)detail=state.meter==='analog'||state.mode==='ohm'?'兩方向都有通道電阻，支持 JFET。僅靠這項量測無法可靠區分 D、S；請核對資料表。':'請換 Ω 檔再量另外兩腳，確認雙向通道電阻。';
+    else if(state.charged)detail='兩方向均導通，符合閘極充電後的通道。放電後重測體二極體方向。';
+    else {
+      const on=activePairs().find(([r,b])=>state.records[r+'-'+b]?.on);
+      if(on){const [red,black]=on;const plus=analog?black:red,minus=analog?red:black;detail=pmos?`P-MOS 體二極體由 D → S：腳 ${plus} 為 D 候選、腳 ${minus} 為 S 候選。`:`N-MOS 體二極體由 S → D：腳 ${plus} 為 S 候選、腳 ${minus} 為 D 候選。`;}
+      else detail='請切二極體檔重測；實際元件仍須資料表交叉確認。';
+    }
+    $('conclusion').textContent=`第 ${state.stage} 階段，已量 ${count}／${state.stage===1?6:2} 組。${detail}`;
+
+  }
+  document.querySelector('.controls').addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b||b.disabled)return;
+    if(b.dataset.device){state.device=b.dataset.device;resetExercise();}
+    if(b.dataset.meter){state.meter=b.dataset.meter;state.records={};}
+    if(b.dataset.mode){state.mode=b.dataset.mode;state.records={};}
+    if(b.dataset.pair)measure(...b.dataset.pair.split('-').map(Number));
+    if(b.dataset.action==='all')activePairs().forEach(([r,k])=>measure(r,k));
+    if(b.dataset.action==='roles')state.showRoles=!state.showRoles;
+    if(b.dataset.action==='restart')resetExercise();
+    if(b.dataset.gate){
+      if(Number(b.dataset.gate)!==devices[state.device].g){$('conclusion').textContent='這個腳號與量測特徵不符，請再比較共同接面端或絕緣端。';return;}
+      state.gate=Number(b.dataset.gate);state.firstRecords={...state.records};state.records={};state.stage=2;state.charged=false;
+    }
+    if(b.dataset.action==='charge'){state.charged=true;state.records={};}
+    if(b.dataset.action==='discharge'){state.charged=false;state.records={};}
+    if(b.dataset.action==='clear')state.records={};
+    const group=b.parentElement.id,key=Object.entries(b.dataset)[0];
+    render();
+    if(key)document.querySelector(`#${group} [data-${key[0]}="${key[1]}"]`)?.focus();
+  });
+  render();
+})();</script></body></html>
